@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.32" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExpenseManager.Core\ExpenseManager.Core.csproj" />
+    <ProjectReference Include="..\ExpenseManager.Infrastructure\ExpenseManager.Infrastructure.csproj" />
+    <ProjectReference Include="..\ExpenseManager.ExternalServices\ExpenseManager.ExternalServices.csproj" />
+    <ProjectReference Include="..\ExpenseManager.Service\ExpenseManager.Service.csproj" />
+  </ItemGroup>
+
+</Project>

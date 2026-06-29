@@ -1,0 +1,96 @@
+﻿@using ExpenseManager.Web.Models
+@model List<ExpenseViewModel>
+@{
+    var model = Model.FirstOrDefault();
+    var successMessage = TempData["SuccessMessage"] as string;
+}
+
+@section Scripts {
+    <script src="~/js/Expense/Index.js"></script>
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div id="successAlert" class="alert alert-success"
+         role="alert"
+         style="position: fixed; top: 20px; left: 50%; 
+         transform: translateX(-50%); max-width: 500px; z-index: 1050;">
+        <div style="text-align: center;">@successMessage</div>
+
+        <div class="progress mt-2" style="height: 6px;">
+            <div id="successProgressBar"
+                 class="progress-bar progress-bar-animated"
+                 role="progressbar"
+                 style="width: 0%;">
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const displayTime = 3000;
+        const progressBar = document.getElementById('successProgressBar');
+        const alertBox = document.getElementById('successAlert');
+
+        function animateProgress() {
+            let startTime = Date.now();
+
+            const timer = setInterval(function () {
+                let elapsed = Date.now() - startTime;
+                let progress = Math.min(elapsed / displayTime, 1) * 100;
+
+                progressBar.style.width = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(timer);
+
+                    setTimeout(() => {
+                        alertBox.style.transition = 'opacity 0.5s';
+                        alertBox.style.opacity = '0';
+                        setTimeout(() => alertBox.style.display = 'none', 500);
+                    }, 500);
+                }
+            }, 50);
+        }
+
+        animateProgress();
+    </script>
+}
+
+<div class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="m-0" style="font-size: 16px;">
+            Total of @Model.Count() @(Model.Count() >= 0? "expenses" : "expense")
+        </h1>
+
+        <h1 id="totalAmount" class="mt-3" 
+            style="font-size: 18px; font-weight: bold;"></h1>
+
+        <div>
+            <a class="btn btn-primary me-2" 
+               asp-action="Filter" asp-controller="Expense">Search</a>
+            <a id="addExpenseButton" class="btn btn-success text-white" 
+               data-bs-toggle="modal" 
+               data-bs-target="#createExpenseModal">Add expense</a>
+        </div>
+
+    </div>
+</div>
+
+<div class="container">
+    <partial name="_ExpenseTable" model="Model" />
+</div>
+
+<partial name="_CreateModal" model="new ExpenseViewModel()" />
+
+<div class="d-flex align-items-center mt-1">
+
+    <label for="currencySelect" style="margin-left: 15px;" 
+           class="me-2 mb-0">Display total in:</label>
+    <select id="currencySelect" class="form-select w-auto">
+        <option value="BRL" selected>BRL (R$)</option>
+        <option value="EUR">Euros (€)</option>
+    </select>
+
+</div>
