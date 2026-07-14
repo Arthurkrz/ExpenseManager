@@ -31,7 +31,6 @@ namespace ExpenseManager.IOC
 
         public static IServiceCollection InjectServices(this IServiceCollection services)
         {
-            services.AddSingleton<ICacheService, RedisCacheService>();
             services.AddScoped<IExpenseService, ExpenseService>();
             services.AddScoped<IExchangeService, ExchangeService>();
 

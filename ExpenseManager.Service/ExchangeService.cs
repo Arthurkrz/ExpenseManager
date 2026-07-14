@@ -7,6 +7,8 @@ namespace ExpenseManager.Service
 {
     public class ExchangeService : IExchangeService
     {
+        private const string EXCHANGECACHEKEY = "exchange";
+        
         private readonly IExchangeRateProvider _exchangeProvider;
         private readonly ICacheService _cacheService;
 
@@ -17,7 +19,8 @@ namespace ExpenseManager.Service
         }
 
         public async Task<Dictionary<string, decimal>> GetExchangeAsync() => 
-            (await _cacheService.GetOrCreateAsync("exchange", 
-                _exchangeProvider.GetExchangeOfDayAsync)).Rates;
+            (await _cacheService.GetOrCreateAsync(EXCHANGECACHEKEY, 
+                _exchangeProvider.GetExchangeOfDayAsync)).Rates ??
+                    new Dictionary<string, decimal>();
     }
 }

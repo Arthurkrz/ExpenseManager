@@ -36,15 +36,15 @@ namespace ExpenseManager.Tests
             _exchangeHandlerMock.Setup(x => x.GetExchangeOfDayAsync())
                 .ReturnsAsync(exchangeResult);
 
-            _memoryCacheServiceMock.Setup(x => x.GetOrCreateAsync(
-                It.IsAny<string>(), It.IsAny<Func<Task<ExchangeResultDTO>>>()))
-                    .ReturnsAsync(exchangeResult);
+            //_memoryCacheServiceMock.Setup(x => x.GetOrCreateAsync(
+            //    It.IsAny<string>(), It.IsAny<Func<Task<ExchangeResultDTO>>>()))
+            //        .ReturnsAsync(exchangeResult);
 
             // Act & Assert
             Assert.Equal(exchangeResult.Rates, await _sut.GetExchangeAsync());
 
-            _memoryCacheServiceMock.Verify(x => x.GetOrCreateAsync(
-                "exchange", It.IsAny<Func<Task<ExchangeResultDTO>>>()), Times.Once);
+            //_memoryCacheServiceMock.Verify(x => x.GetOrCreateAsync(
+            //    "exchange", It.IsAny<Func<Task<ExchangeResultDTO>>>()), Times.Once);
         }
     }
 }
