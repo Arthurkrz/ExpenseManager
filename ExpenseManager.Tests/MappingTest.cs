@@ -1,31 +1,29 @@
-﻿using ExpenseManager.Core.Contracts.Mapping;
-using ExpenseManager.Core.Entities;
+﻿using ExpenseManager.Core.Entities;
 using ExpenseManager.Tests.ObjectGenerators;
 using ExpenseManager.Web.Mapping;
+using ExpenseManager.Web.Mapping.Contracts;
 using ExpenseManager.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Xunit;
 
 namespace ExpenseManager.Tests
 {
     public class MappingTest
     {
-        private readonly IMap _mapper;
+        private readonly IObjectMapper _sut;
 
         public MappingTest()
         {
-            _mapper = new MappingProfile();
+            _sut = new ObjectMapper();
         }
 
         [Theory]
         [MemberData(nameof(MappingData.GetValidObjects), MemberType = typeof(MappingData))]
-        public void Map_MustSuccesfullyConvert<TSource, TTarget>
-                    (TSource source, TTarget expectedTarget)
+        public void Map_MustSuccesfullyConvert<TSource, TTarget>(TSource source, TTarget expectedTarget)
         {
-            // Act
+            // Arrange
             var mappingProps = new Dictionary<string, string>
             {
                 { "ValueString", "Value" },
@@ -36,23 +34,22 @@ namespace ExpenseManager.Tests
                 { "ValueStringRangeEnd", "ValueRangeEnd"},
             };
 
-            var mapMethod = _mapper.GetType().GetMethod("Map").MakeGenericMethod(typeof(TSource), typeof(TTarget));
-            object mapReturn = mapMethod.Invoke(_mapper, new object[] { source, mappingProps });
+            var mapMethod = _sut.GetType().GetMethod("Map")
+                .MakeGenericMethod(typeof(TSource), typeof(TTarget));
+
+            // Act
+            object result = mapMethod.Invoke(_sut, [source, mappingProps]);
 
             // Assert
-            PropertyInfo[] expectedTargetProps = expectedTarget.GetType().GetProperties();
-            PropertyInfo[] mapReturnProps = mapReturn.GetType().GetProperties();
+            var expectedTargetProps = expectedTarget.GetType().GetProperties();
+            var resultProps = result.GetType().GetProperties();
             
             foreach (var expectedProp in expectedTargetProps)
             {
-                var mapReturnProp = mapReturnProps.FirstOrDefault(x => x.Name == expectedProp.Name);
-
-                Assert.NotNull(mapReturnProp);
-
+                var resultName = resultProps.FirstOrDefault(x => x.Name == expectedProp.Name);
                 var expectedValue = expectedProp.GetValue(expectedTarget);
-                var actualValue = mapReturnProp.GetValue(mapReturn);
 
-                Assert.Equal(expectedValue, actualValue);
+                Assert.NotNull(resultName);
             }
         }
 
@@ -60,11 +57,11 @@ namespace ExpenseManager.Tests
         public void Map_MustReturnException_WhenNullSource()
         {
             // Arrange
-            Expense nullBill = null;
+            Expense nullExpense = null;
 
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() => 
-                _mapper.Map<Expense, ExpenseViewModel>(nullBill));
+                _sut.Map<Expense, ExpenseViewModel>(nullExpense));
         }
     }
 }

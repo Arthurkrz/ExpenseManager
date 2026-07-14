@@ -10,47 +10,32 @@ namespace ExpenseManager.Tests.ObjectGenerators
         {
             yield return new object[]
             {
-                new ExpenseFilter()
-                { DateRangeStart = DateTime.Now.AddYears(-1) },
-                @"Não é possível listar despesas de mais de 1 ano atrás."
+                new ExpenseFilter() { DateRangeStart = DateTime.Now.AddYears(-1) },
+                "Expenses from more than 1 year ago can't be listed"
             };
 
             yield return new object[]
             {
-                new ExpenseFilter()
-                {
-                    DateRangeStart = DateTime.Now,
-                    DateRangeEnd = DateTime.Now.AddDays(-1)
-                },
-                @"O intervalo inicial de data da despesa não 
-                  pode ser maior que o intervalo final."
+                new ExpenseFilter() { DateRangeStart = DateTime.Now, DateRangeEnd = DateTime.Now.AddDays(-1) },
+                "Start of range for expense date must be lower than end of range"
             };
 
             yield return new object[]
             {
-                new ExpenseFilter()
-                {
-                    ValueRangeStart = 2,
-                    ValueRangeEnd = 1
-                },
-                @"O intervalo inicial de valor da despesa não 
-                  pode ser maior que o intervalo final."
+                new ExpenseFilter() { ValueRangeStart = 2, ValueRangeEnd = 1 },
+                "Start of range for value must be lower than end of range"
             };
 
             yield return new object[]
             {
-                new ExpenseFilter()
-                { ValueRangeStart = -1 },
-                @"O intervalo inicial de valor da despesa não 
-                  pode ser menor que zero."
+                new ExpenseFilter() { ValueRangeStart = -1 },
+                "Start of range for value must be higher than zero"
             };
 
             yield return new object[]
             {
-                new ExpenseFilter()
-                { ValueRangeEnd = 1000001 },
-                @"O intervalo final de valor da despesa não 
-                  pode ser maior que 1 milhão."
+                new ExpenseFilter() { ValueRangeEnd = 1000001 },
+                "End of range for value must be lower than a million"
             };
         }
     }

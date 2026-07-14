@@ -18,12 +18,13 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Name = null,
                     Currency = faker.PickRandom<Currency>(),
-                    Value = faker.Random.Double(1, 1000000),
+                    Value = faker.Random.Decimal(1, 1000000),
                     Type = faker.PickRandom<ExpenseType>(),
                     ExpenseDate = faker.Date.Future(1, DateTime.Now),
                     Source = faker.Random.Word()
                 },
-                "Insira um nome."
+
+                "Name is required"
             };
 
             yield return new object[]
@@ -32,12 +33,13 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Name = faker.Name.FirstName(),
                     Currency = null,
-                    Value = faker.Random.Double(1, 1000000),
+                    Value = faker.Random.Decimal(1, 1000000),
                     Type = faker.PickRandom<ExpenseType>(),
                     ExpenseDate = faker.Date.Future(1, DateTime.Now),
                     Source = faker.Random.Word()
                 },
-                "Especifique a moeda."
+
+                "Currency is required"
             };
 
             yield return new object[]
@@ -51,7 +53,8 @@ namespace ExpenseManager.Tests.ObjectGenerators
                     ExpenseDate = faker.Date.Future(1, DateTime.Now),
                     Source = faker.Random.Word()
                 },
-                "Especifique o valor da despesa."
+
+                "Value is required"
             };
 
             yield return new object[]
@@ -60,12 +63,13 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Name = faker.Name.FirstName(),
                     Currency = faker.PickRandom<Currency>(),
-                    Value = faker.Random.Double(1, 1000000),
+                    Value = faker.Random.Decimal(1, 1000000),
                     Type = null,
                     ExpenseDate = faker.Date.Future(1, DateTime.Now),
                     Source = faker.Random.Word()
                 },
-                "Especifique a categoria da despesa."
+
+                "Expense category is required"
             };
 
             yield return new object[]
@@ -74,12 +78,13 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Name = faker.Name.FirstName(),
                     Currency = faker.PickRandom<Currency>(),
-                    Value = faker.Random.Double(1, 1000000),
+                    Value = faker.Random.Decimal(1, 1000000),
                     Type = faker.PickRandom<ExpenseType>(),
                     ExpenseDate = default,
                     Source = faker.Random.Word()
                 },
-                "Insira a data da despesa."
+
+                "Expense date is required"
             };
 
             yield return new object[]
@@ -88,12 +93,13 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Name = faker.Name.FirstName(),
                     Currency = faker.PickRandom<Currency>(),
-                    Value = faker.Random.Double(1, 1000000),
+                    Value = faker.Random.Decimal(1, 1000000),
                     Type = faker.PickRandom<ExpenseType>(),
                     ExpenseDate = faker.Date.Future(1, DateTime.Now),
                     Source = null
                 },
-                "Insira a origem da despesa."
+
+                "Expense source is required"
             };
 
             yield return new object[]
@@ -107,7 +113,8 @@ namespace ExpenseManager.Tests.ObjectGenerators
                     ExpenseDate = faker.Date.Future(1, DateTime.Now),
                     Source = faker.Random.Word()
                 },
-                @"O valor da despesa não pode ser maior que R$ 1 milhão."
+
+                "Value must be lower than a million"
             };
 
             yield return new object[]
@@ -116,12 +123,13 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Name = faker.Name.FirstName(),
                     Currency = faker.PickRandom<Currency>(),
-                    Value = faker.Random.Double(1, 1000000),
+                    Value = faker.Random.Decimal(1, 1000000),
                     Type = faker.PickRandom<ExpenseType>(),
                     ExpenseDate = DateTime.Now.AddYears(-1),
                     Source = faker.Random.Word()
                 },
-                @"Despesas de mais de 1 ano atrás não podem ser adicionadas."
+
+                "Expenses must be from less than 1 year ago"
             };
         }
     }

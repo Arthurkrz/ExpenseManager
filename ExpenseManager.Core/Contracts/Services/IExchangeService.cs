@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ExpenseManager.Core.Contracts.ExternalServices
+namespace ExpenseManager.Core.Contracts.Services
 {
     public interface IExchangeService
     {
-        Task<Dictionary<string, double>> GetExchangeAsync();
+        Task<Dictionary<string, decimal>> GetExchangeAsync();
     }
 }

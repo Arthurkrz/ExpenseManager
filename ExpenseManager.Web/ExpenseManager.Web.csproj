@@ -2,17 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <UserSecretsId>10d1abe1-2ae3-44ed-bf02-3304a01ab505</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LinqKit" Version="1.3.8" />
-    <PackageReference Include="LinqKit.Core" Version="1.2.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.32">
+    <PackageReference Include="LinqKit" Version="1.3.11" />
+    <PackageReference Include="LinqKit.Core" Version="1.2.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.5" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="3.0.11" />
   </ItemGroup>
 
   <ItemGroup>

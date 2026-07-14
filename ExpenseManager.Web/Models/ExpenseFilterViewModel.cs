@@ -11,7 +11,7 @@ namespace ExpenseManager.Web.Models
 
         public string SourceContains { get; set; }
 
-        public double? ValueRangeStart
+        public decimal? ValueRangeStart
         {
             get
             {
@@ -21,20 +21,16 @@ namespace ExpenseManager.Web.Models
                 string valueStringStart = ValueStringRangeStart
                                           .Replace(',', '.');
 
-                double.TryParse(valueStringStart,
-                                NumberStyles.Currency,
-                                CultureInfo.InvariantCulture,
-                                out var valueStart);
+                decimal.TryParse(valueStringStart,
+                    NumberStyles.Currency,
+                    CultureInfo.InvariantCulture,
+                    out var valueStart);
 
                 return valueStart;
             }
         }
 
-        public string ValueStringRangeStart { get; set; }
-
-        public string ValueStringRangeEnd { get; set; }
-
-        public double? ValueRangeEnd
+        public decimal? ValueRangeEnd
         {
             get
             {
@@ -44,14 +40,18 @@ namespace ExpenseManager.Web.Models
                 string valueStringEnd = ValueStringRangeEnd
                                         .Replace(',', '.');
 
-                double.TryParse(valueStringEnd,
-                                NumberStyles.Currency,
-                                CultureInfo.InvariantCulture,
-                                out var valueEnd);
+                decimal.TryParse(valueStringEnd,
+                    NumberStyles.Currency,
+                    CultureInfo.InvariantCulture,
+                    out var valueEnd);
 
                 return valueEnd;
             }
         }
+
+        public string ValueStringRangeStart { get; set; }
+
+        public string ValueStringRangeEnd { get; set; }
 
         public DateTime? DateRangeStart { get; set; }
 

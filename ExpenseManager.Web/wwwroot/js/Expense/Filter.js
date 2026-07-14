@@ -45,6 +45,7 @@ $(document).ready(function () {
             SourceContains: $("#SourceContains").val(),
             Currency: $("#Currency").val(),
             Type: $("#Type").val(),
+            Month: $("#Month").val(),
             DateRangeStart: $("#DateRangeStart").val(),
             DateRangeEnd: $("#DateRangeEnd").val(),
             ValueStringRangeStart: $("#ValueStringRangeStart").val(),
@@ -52,27 +53,26 @@ $(document).ready(function () {
         };
 
         $.ajax({
-            url: "/Filter/Expense",
+            url: "/Expense/Filter",
             type: "POST",
             data: filterData,
-            success: function (response) {
-                if (response.success) {
-                    $("#filteredResults").html(response);
-                } else {
-                    let errorContainer = $("#errorMessages");
-                    if (response.errors && response.errors.length > 0) {
-                        errorContainer.html(response.errors.join("<br>"));
-                        errorContainer.removeClass("d-none").show();
-                    } else {
-                        errorContainer.html("Unknown error.");
-                        errorContainer.removeClass("d-none").show();
-                    }
-                }
+            success: function (html) {
+                $("#filteredResults").html(html);
+                $("#errorMessages").addClass("d-none").empty();
             },
-            error: function () {
-                $("#errorMessages")
-                    .html("Error when processing request.")
-                    .removeClass("d-none").show();
+
+            error: function (xhr) {
+                let errorContainer = $("#errorMessages");
+
+                if (xhr.responseJSON
+                    && xhr.responseJSON.errors
+                    && xhr.responseJSON.errors.length > 0) {
+                    errorContainer.html(xhr.responseJSON.errors.join("<br>"));
+                } else {
+                    errorContainer.html("An unexpected error occurred.");
+                }
+
+                errorContainer.removeClass("d-none").show();
             }
         });
     });

@@ -25,7 +25,7 @@ namespace ExpenseManager.Infrastructure.Configurations
                    .IsRequired();
 
             builder.Property(x => x.Value)
-                   .HasColumnName("Valor")
+                   .HasColumnName("Value")
                    .IsRequired();
 
             builder.Property(x => x.Type)

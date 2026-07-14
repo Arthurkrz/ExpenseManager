@@ -64,7 +64,7 @@ $(document).on("click", "#saveExpenseButton", function (e) {
     }
 
     $.ajax({
-        url: "/Create/Expense",
+        url: "/Expense/Create",
         type: "POST",
         data: form.serialize(),
         success: function (response) {
@@ -73,7 +73,6 @@ $(document).on("click", "#saveExpenseButton", function (e) {
                 location.reload();
             } else {
                 let errorContainer = $("#errorMessages");
-                x
                 if (response.errors && response.errors.length > 0) {
                     errorContainer.html(response.errors.join("<br>"));
                     errorContainer.removeClass("d-none").show();
@@ -106,7 +105,7 @@ $(document).on("click", "[id^='saveEditButton-']", function (e) {
     }
 
     $.ajax({
-        url: "/Update/Expense",
+        url: "/Expense/Update",
         type: "POST",
         data: form.serialize(),
         success: function (response) {

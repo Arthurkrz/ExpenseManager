@@ -6,27 +6,21 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-
                 <h5 class="modal-title" id="modalLabel-@Model.Id">
-                Expense Deletion Confirmation - @Model.Name</h5>
+                    Expense Deletion Confirmation - @Model.Name</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" 
-                        aria-label="Close"></button>
-
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
                 <h5 style="text-align: center">
                 Are you sure that you wish to delete this expense?</h5>
                 <h6 class="alert-danger" style="color: red; padding-top: 10px; 
                     text-align: center;">THIS ACTION IS IRREVERSIBLE.</h6>
-
             </div>
             <div class="modal-footer d-flex justify-content-center gap-3 w-100">
-
                 <button type="button" style="font-size: 20px" 
-                        class="btn btn-secondary flex-grow-1" 
-                        data-bs-dismiss="modal">No</button>
-
+                    class="btn btn-secondary flex-grow-1" 
+                    data-bs-dismiss="modal">No</button>
                 <a type="button" style="font-size: 20px" asp-action="Delete" 
                    asp-controller="Expense" asp-route-id="@Model.Id" 
                    class="btn btn-danger flex-grow-1">Yes</a>

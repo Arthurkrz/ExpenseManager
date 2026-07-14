@@ -12,17 +12,16 @@ namespace ExpenseManager.Tests
 {
     public class ExchangeServiceTest
     {
-        private readonly Mock<IExchangeHandler> _exchangeHandlerMock;
-        private readonly Mock<IMemoryCacheService> _memoryCacheServiceMock;
+        private readonly Mock<IExchangeRateProvider> _exchangeHandlerMock;
+        private readonly Mock<ICacheService> _memoryCacheServiceMock;
         private readonly ExchangeService _sut;
 
         public ExchangeServiceTest()
         {
-            _exchangeHandlerMock = new Mock<IExchangeHandler>();
-            _memoryCacheServiceMock = new Mock<IMemoryCacheService>();
+            _exchangeHandlerMock = new Mock<IExchangeRateProvider>();
+            _memoryCacheServiceMock = new Mock<ICacheService>();
 
-            _sut = new ExchangeService(_exchangeHandlerMock.Object, 
-                                       _memoryCacheServiceMock.Object);
+            _sut = new ExchangeService(_exchangeHandlerMock.Object, _memoryCacheServiceMock.Object);
         }
 
         [Fact]
@@ -31,28 +30,21 @@ namespace ExpenseManager.Tests
             // Arrange
             var exchangeResult = new ExchangeResultDTO
             {
-                Rates = new Dictionary<string, double>
-                {
-                    { "BRL", 6.060268 }
-                }
+                Rates = new Dictionary<string, decimal> { { "BRL", 6.060268m } }
             };
 
             _exchangeHandlerMock.Setup(x => x.GetExchangeOfDayAsync())
-                                             .ReturnsAsync(exchangeResult);
+                .ReturnsAsync(exchangeResult);
 
             _memoryCacheServiceMock.Setup(x => x.GetOrCreateAsync(
-                                                 It.IsAny<string>(),
-                                                 It.IsAny<Func<Task<ExchangeResultDTO>>>()))
-                                                .ReturnsAsync(exchangeResult);
+                It.IsAny<string>(), It.IsAny<Func<Task<ExchangeResultDTO>>>()))
+                    .ReturnsAsync(exchangeResult);
+
             // Act & Assert
-            var result = await _sut.GetExchangeAsync();
+            Assert.Equal(exchangeResult.Rates, await _sut.GetExchangeAsync());
 
             _memoryCacheServiceMock.Verify(x => x.GetOrCreateAsync(
-                                                  "exchange", 
-                                                  It.IsAny<Func<Task<ExchangeResultDTO>>>()), 
-                                                  Times.Once);
-
-            Assert.Equal(exchangeResult.Rates, result);
+                "exchange", It.IsAny<Func<Task<ExchangeResultDTO>>>()), Times.Once);
         }
     }
 }

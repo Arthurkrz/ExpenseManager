@@ -9,7 +9,7 @@ namespace ExpenseManager.Core.Entities
         
         public Currency? Currency { get; set; }
         
-        public double Value { get; set; }
+        public decimal Value { get; set; }
         
         public ExpenseType? Type { get; set; }
         

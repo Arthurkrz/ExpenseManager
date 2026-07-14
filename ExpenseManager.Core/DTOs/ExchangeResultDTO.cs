@@ -13,6 +13,6 @@ namespace ExpenseManager.Core.DTOs
         public string Base { get; set; }
         
         [JsonPropertyName("rates")]
-        public Dictionary<string, double> Rates { get; set; }
+        public Dictionary<string, decimal> Rates { get; set; }
     }
 }

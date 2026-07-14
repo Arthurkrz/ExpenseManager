@@ -22,6 +22,6 @@ namespace ExpenseManager.Infrastructure.Repositories
             await _context.Set<Expense>().Where(predicate).ToListAsync();
 
         public async Task<Expense> GetByIdAsync(Guid id) =>
-            await (await GetAllAsync()).FirstOrDefaultAsync(b => b.Id == id);
+            (await GetAllAsync()).FirstOrDefault(b => b.Id == id);
     }
 }

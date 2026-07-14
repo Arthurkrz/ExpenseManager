@@ -12,6 +12,22 @@ namespace ExpenseManager.Core.Validators
                 !string.IsNullOrEmpty(n))
                .WithMessage("Name is required");
 
+            RuleFor(b => b.Currency)
+                .NotNull()
+                .WithMessage("Currency is required");
+
+            RuleFor(b => b.Value)
+                .NotEqual(0)
+                .WithMessage("Value is required");
+
+            RuleFor(b => b.Value)
+                .LessThan(1000000)
+                .WithMessage("Value must be lower than a million");
+
+            RuleFor(b => b.Type)
+                .NotNull()
+                .WithMessage("Expense category is required");
+
             RuleFor(b => b.ExpenseDate)
                 .NotNull().NotEqual(default(DateTime))
                 .WithMessage("Expense date is required");
@@ -23,22 +39,6 @@ namespace ExpenseManager.Core.Validators
             RuleFor(b => b.Source).Must(n => 
                 !string.IsNullOrEmpty(n))
                 .WithMessage("Expense source is required");
-
-            RuleFor(b => b.Value)
-                .NotEqual(0)
-                .WithMessage("Value is required");
-
-            RuleFor(b => b.Value)
-                .LessThan(1000000)
-                .WithMessage("Value must be lower than a million");
-
-            RuleFor(b => b.Currency)
-                .NotNull()
-                .WithMessage("Currency is required");
-
-            RuleFor(b => b.Type)
-                .NotNull()
-                .WithMessage("Expense category is required");
         }
     }
 }

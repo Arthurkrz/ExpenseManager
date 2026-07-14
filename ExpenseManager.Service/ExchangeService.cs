@@ -7,17 +7,17 @@ namespace ExpenseManager.Service
 {
     public class ExchangeService : IExchangeService
     {
-        private readonly IExchangeHandler _exchangeHandler;
-        private readonly IMemoryCacheService _memoryCacheService;
+        private readonly IExchangeRateProvider _exchangeProvider;
+        private readonly ICacheService _cacheService;
 
-        public ExchangeService(IExchangeHandler exchangeHandler, IMemoryCacheService memoryCacheService)
+        public ExchangeService(IExchangeRateProvider exchangeProvider, ICacheService cacheService)
         {
-            _exchangeHandler = exchangeHandler;
-            _memoryCacheService = memoryCacheService;
+            _exchangeProvider = exchangeProvider;
+            _cacheService = cacheService;
         }
 
-        public async Task<Dictionary<string, double>> GetExchangeAsync() => 
-            (await _memoryCacheService.GetOrCreateAsync("exchange", 
-                _exchangeHandler.GetExchangeOfDayAsync)).Rates;
+        public async Task<Dictionary<string, decimal>> GetExchangeAsync() => 
+            (await _cacheService.GetOrCreateAsync("exchange", 
+                _exchangeProvider.GetExchangeOfDayAsync)).Rates;
     }
 }

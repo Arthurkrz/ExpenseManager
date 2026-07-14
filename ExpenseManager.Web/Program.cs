@@ -1,14 +1,13 @@
-using ExpenseManager.Core.Contracts.Mapping;
 using ExpenseManager.Infrastructure;
 using ExpenseManager.IOC;
 using ExpenseManager.Web.Mapping;
+using ExpenseManager.Web.Mapping.Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using StackExchange.Redis;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,27 +15,18 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 var services = builder.Services;
 
-var redisConnectionString = configuration["Redis:ConnectionString"] ?? 
-    throw new InvalidOperationException("Redis Connection String not configured.");
-
 var connectionString = configuration.GetConnectionString("DefaultConnection") ??
-    throw new InvalidOperationException("Database Connection String not configured.");
+    throw new InvalidOperationException("Database connection string not configured.");
 
-services.AddSingleton<IConnectionMultiplexer>(c => 
-    ConnectionMultiplexer.Connect(redisConnectionString));
-
-services.AddDbContext<Context>(options => 
+services.AddDbContext<Context>(options =>
     options.UseSqlServer(connectionString));
 
 services.AddMemoryCache();
 services.AddControllersWithViews();
 
-services.InjectValidators()
-        .InjectExternalServices()
-        .InjectServices()
-        .InjectRepositories();
+services.InjectDependencies(configuration);
 
-services.AddSingleton<IMap, MappingProfile>();
+services.AddSingleton<IObjectMapper, ObjectMapper>();
 
 var app = builder.Build();
 

@@ -9,9 +9,9 @@ namespace ExpenseManager.Core.Entities
         
         public string SourceContains { get; set; }
         
-        public double? ValueRangeStart { get; set; }
+        public decimal? ValueRangeStart { get; set; }
         
-        public double? ValueRangeEnd { get; set; }
+        public decimal? ValueRangeEnd { get; set; }
         
         public DateTime? DateRangeStart { get; set; }
         

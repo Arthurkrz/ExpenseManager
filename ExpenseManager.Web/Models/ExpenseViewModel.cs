@@ -21,12 +21,12 @@ namespace ExpenseManager.Web.Models
 
         [DisplayName("Value")]
         [DisplayFormat(DataFormatString = "{0:F2}", ApplyFormatInEditMode = true)]
-        public double Value
+        public decimal Value
         {
             get
             {
                 string valueString = ValueString.Replace(',', '.');
-                double.TryParse(valueString,
+                decimal.TryParse(valueString,
                     NumberStyles.Currency, 
                     CultureInfo.InvariantCulture, out var value);
 

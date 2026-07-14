@@ -36,18 +36,18 @@ namespace ExpenseManager.Tests
         public async Task CreateExpense_MustAddSuccesfully()
         {
             // Arrange
-            Expense expense = new Expense()
+            var expense = new Expense()
             {
                 Name = _faker.Name.FirstName(),
                 Currency = _faker.PickRandom<Currency>(),
-                Value = _faker.Random.Double(1, 1000000),
+                Value = _faker.Random.Decimal(1, 1000000),
                 Type = _faker.PickRandom<ExpenseType>(),
                 ExpenseDate = _faker.Date.Future(),
                 Source = _faker.Random.Word(),
             };
 
             // Act & Assert
-            await _sut.CreateExpenseAsync(expense);
+            Assert.True((await _sut.CreateExpenseAsync(expense)).Success);
             _mockRepository.Verify(x => x.AddAsync(expense), Times.Once);
         }
 
@@ -68,29 +68,22 @@ namespace ExpenseManager.Tests
             // Arrange
             Expense expense = null;
 
-            // Act & Assert
+            // Act
             var result = await _sut.CreateExpenseAsync(expense);
 
+            // Assert
             Assert.False(result.Success);
-            Assert.Contains("A despesa não pode ser nula.", result.Errors);
-        }
-
-        [Fact]
-        public async Task List_MustCallRepository()
-        {
-            // Act & Assert
-            var result = await _sut.GetAllAsync();
-            Assert.NotNull(result);
+            Assert.Contains("Expense must not be null", result.Errors);
         }
 
         [Fact]
         public async Task GetExpensesWithFilter_MustGetSuccesfully()
         {
             // Arrange
-            ExpenseFilter expenseFilter = new ExpenseFilter
+            var expenseFilter = new ExpenseFilter
             {
-                NameContains = "Arroz",
-                SourceContains = "Jacomar",
+                NameContains = "Rice",
+                SourceContains = "Walmart",
                 ValueRangeStart = 25,
                 ValueRangeEnd = 150,
                 DateRangeStart = DateTime.Now.AddMonths(-1),
@@ -100,13 +93,11 @@ namespace ExpenseManager.Tests
                 Month = PurchaseMonth.February
             };
 
-            // Act
             var filterExpression = ExpensePredicateBuilder.Build(expenseFilter);
-            var result = await _sut.GetExpensesWithFilterAsync(expenseFilter);
 
-            // Assert
+            // Act & Assert
+            Assert.True((await _sut.GetExpensesWithFilterAsync(expenseFilter)).Success);
             Assert.NotNull(filterExpression);
-            Assert.True(result.Success);
 
             _mockRepository.Verify(x => x.GetExpensesWithFilterAsync(
                 It.IsAny<Expression<Func<Expense, bool>>>()), Times.AtLeastOnce);
@@ -114,12 +105,12 @@ namespace ExpenseManager.Tests
 
         [Theory]
         [MemberData(nameof(ExpenseFilterData.GetInvalidFilters), MemberType = typeof(ExpenseFilterData))]
-        public async Task GetExpensesWithFilter_MustReturnError_WhenInvalidFilter
-                          (ExpenseFilter expenseFilter, string errorMessage)
+        public async Task GetExpensesWithFilter_MustReturnError_WhenInvalidFilter(ExpenseFilter expenseFilter, string errorMessage)
         {
-            // Act & Assert
+            // Act
             var result = await _sut.GetExpensesWithFilterAsync(expenseFilter);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Contains(errorMessage, result.Errors);
         }
@@ -142,9 +133,7 @@ namespace ExpenseManager.Tests
             _mockRepository.Setup(x => x.GetByIdAsync(expense.Id)).ReturnsAsync(expense);
 
             // Act & Assert
-            var result = await _sut.UpdateExpenseAsync(expense);
-
-            Assert.True(result.Success);
+            Assert.True((await _sut.UpdateExpenseAsync(expense)).Success);
             _mockRepository.Verify(x => x.UpdateAsync(expense), Times.Once);
         }
 
@@ -152,12 +141,13 @@ namespace ExpenseManager.Tests
         [MemberData(nameof(ExpenseData.GetInvalidExpenses), MemberType = typeof(ExpenseData))]
         public async Task UpdateExpense_MustReturnError_WhenInvalidProperty(Expense expense, string errorMessage)
         {
-            // Act & Assert
-            _mockRepository.Setup(x => x.GetByIdAsync(expense.Id))
-                           .ReturnsAsync(expense);
+            // Arrange
+            _mockRepository.Setup(x => x.GetByIdAsync(expense.Id)).ReturnsAsync(expense);
 
+            // Act
             var result = await _sut.UpdateExpenseAsync(expense);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Contains(errorMessage, result.Errors);
         }
@@ -166,10 +156,10 @@ namespace ExpenseManager.Tests
         public async Task UpdateExpense_MustReturnError_WhenExpenseNotFound()
         {
             // Arrange
-            Expense expense = new Expense
+            var expense = new Expense
             {
                 Id = new Guid(),
-                Name = "Almoço",
+                Name = "Lunch",
                 Currency = Currency.Euro,
                 Value = 1000,
                 Type = ExpenseType.Food,
@@ -182,34 +172,39 @@ namespace ExpenseManager.Tests
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("A despesa não foi encontrada.", result.Errors);
+            Assert.Contains("Expense not found", result.Errors);
         }
 
         [Fact]
         public async Task DeleteExpense_MustDeleteSuccesfully()
         {
             // Arrange
-            Guid id = new Guid();
-            Expense expense = new Expense();
+            var id = Guid.NewGuid();
+            var expense = new Expense();
 
             _mockRepository.Setup(x => x.GetByIdAsync(id)).ReturnsAsync(expense);
 
-            // Act
-            var result = await _sut.DeleteExpenseAsync(id);
-
-            // Assert
+            // Act & Assert
+            Assert.True((await _sut.DeleteExpenseAsync(id)).Success);
             _mockRepository.Verify(x => x.DeleteAsync(expense), Times.Once);
-            Assert.True(result.Success);
         }
 
         [Fact]
         public async Task DeleteExpense_MustReturnError_WhenObjectNotFound()
         {
-            // Act & Assert
-            var result = await _sut.DeleteExpenseAsync(new Guid());
+            // Act
+            var result = await _sut.DeleteExpenseAsync(Guid.NewGuid());
 
+            // Assert
             Assert.False(result.Success);
-            Assert.Contains("ID não corresponde a nenhuma despesa.", result.Errors);
+            Assert.Contains("ID does not match any expense", result.Errors);
+        }
+
+        [Fact]
+        public async Task List_MustCallRepository()
+        {
+            // Act & Assert
+            Assert.NotNull(await _sut.GetAllAsync());
         }
     }
 }

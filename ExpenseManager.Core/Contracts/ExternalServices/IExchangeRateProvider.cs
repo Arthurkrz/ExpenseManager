@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace ExpenseManager.Core.Contracts.ExternalServices
 {
-    public interface IExchangeHandler
+    public interface IExchangeRateProvider
     {
         Task<ExchangeResultDTO> GetExchangeOfDayAsync();
     }
