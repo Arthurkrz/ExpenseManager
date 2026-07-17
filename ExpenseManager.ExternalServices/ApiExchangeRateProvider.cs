@@ -1,7 +1,9 @@
 ﻿using ExpenseManager.Core.Contracts.ExternalServices;
 using ExpenseManager.Core.DTOs;
 using ExpenseManager.ExternalServices.Settings;
+using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,10 +15,10 @@ namespace ExpenseManager.ExternalServices
         private readonly HttpClient _httpClient;
         private readonly ExchangeApiSettings _settings;
 
-        public ApiExchangeRateProvider(HttpClient httpClient, ExchangeApiSettings settings)
+        public ApiExchangeRateProvider(HttpClient httpClient, IOptions<ExchangeApiSettings> settings)
         {
             _httpClient = httpClient;
-            _settings = settings;
+            _settings = settings.Value;
         }
 
         public async Task<ExchangeResultDTO> GetExchangeOfDayAsync()
@@ -29,7 +31,6 @@ namespace ExpenseManager.ExternalServices
             var url = 
                 $"{_settings.BaseUrl.TrimEnd('/')}/{_settings.LatestEndpoint}" +
                 $"?access_key={Uri.EscapeDataString(_settings.AccessKey)}" +
-                $"&base={Uri.EscapeDataString(_settings.BaseCurrency)}" +
                 $"&symbols={Uri.EscapeDataString(symbols)}";
 
             var response = await _httpClient.GetAsync(url);
@@ -42,8 +43,34 @@ namespace ExpenseManager.ExternalServices
             var options = new JsonSerializerOptions 
                 { PropertyNameCaseInsensitive = true };
 
-            return JsonSerializer.Deserialize<ExchangeResultDTO>(content, options)
+            var result = JsonSerializer.Deserialize<ExchangeResultDTO>(content, options)
                 ?? new ExchangeResultDTO();
+
+            return ConvertToUSD(result);
+        }
+
+        private ExchangeResultDTO ConvertToUSD(ExchangeResultDTO euroBaseResult)
+        {
+            if (euroBaseResult?.Rates == null 
+                || !euroBaseResult.Rates.TryGetValue("USD", out var usdPerEuro) 
+                || usdPerEuro == 0)
+                return euroBaseResult;
+
+            var usdCenteredRates = new Dictionary<string, decimal>();
+
+            foreach (var rate in euroBaseResult.Rates)
+            {
+                if (rate.Key == "USD") usdCenteredRates["USD"] = 1m;
+                else usdCenteredRates[rate.Key] = rate.Value / usdPerEuro;
+            }
+
+            usdCenteredRates["EUR"] = 1m / usdPerEuro;
+
+            return new ExchangeResultDTO
+            {
+                Date = euroBaseResult.Date,
+                Rates = usdCenteredRates
+            };
         }
     }
 }

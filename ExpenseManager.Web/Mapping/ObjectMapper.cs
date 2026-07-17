@@ -93,7 +93,7 @@ namespace ExpenseManager.Web.Mapping
 
                 if (IsNestedClassMappingPossible(sourceProp.PropertyType, targetProp.PropertyType))
                 {
-                    var mappedClass = MapNestedClass(sourceValue, sourceProp.PropertyType);
+                    var mappedClass = MapNestedClass(sourceValue, targetProp.PropertyType);
 
                     targetProp.SetValue(target, mappedClass);
                     continue;
@@ -123,13 +123,13 @@ namespace ExpenseManager.Web.Mapping
 
                 if (IsAssignableDirectly(sourceProp.PropertyType, targetProp.PropertyType))
                 {
-                    targetProp.SetValue(target, sourceValue);
+                    targetProp.SetValue(target, sourcePropValue);
                     continue;
                 }
 
                 if (IsEnumMappingPossible(sourceProp.PropertyType, targetProp.PropertyType))
                 {
-                    var mappedEnum = MapEnumValue(sourceValue,
+                    var mappedEnum = MapEnumValue(sourcePropValue,
                         sourceProp.PropertyType, targetProp.PropertyType);
 
                     targetProp.SetValue(target, mappedEnum);
@@ -138,7 +138,7 @@ namespace ExpenseManager.Web.Mapping
 
                 if (IsNestedClassMappingPossible(sourceProp.PropertyType, targetProp.PropertyType))
                 {
-                    var mappedClass = MapNestedClass(sourceValue, sourceProp.PropertyType);
+                    var mappedClass = MapNestedClass(sourcePropValue, targetProp.PropertyType);
 
                     targetProp.SetValue(target, mappedClass);
                     continue;

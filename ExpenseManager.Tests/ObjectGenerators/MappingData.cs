@@ -17,7 +17,7 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Id = new Guid(),
                     Name = "Televisão",
-                    Currency = Currency.Euro,
+                    Currency = Currency.EUR,
                     Value = 1000,
                     Type = ExpenseType.House,
                     ExpenseDate = DateTime.Now.AddMonths(-1).Date,
@@ -28,7 +28,7 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Id = new Guid(),
                     Name = "Televisão",
-                    Currency = CurrencyVM.Euro,
+                    Currency = CurrencyVM.EUR,
                     ValueString = "1000.00",
                     Type = ExpenseTypeVM.House,
                     ExpenseDate = DateTime.Now.AddMonths(-1).Date,
@@ -42,7 +42,7 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Id = new Guid(),
                     Name = "Televisão",
-                    Currency = CurrencyVM.Euro,
+                    Currency = CurrencyVM.EUR,
                     ValueString = "1000.00",
                     Type = ExpenseTypeVM.House,
                     ExpenseDate = DateTime.Now.AddMonths(-1).Date,
@@ -53,7 +53,7 @@ namespace ExpenseManager.Tests.ObjectGenerators
                 {
                     Id = new Guid(),
                     Name = "Televisão",
-                    Currency = Currency.Euro,
+                    Currency = Currency.EUR,
                     Value = 1000,
                     Type = ExpenseType.House,
                     ExpenseDate = DateTime.Now.AddMonths(-1).Date,
@@ -71,7 +71,7 @@ namespace ExpenseManager.Tests.ObjectGenerators
                     ValueRangeEnd = 20000,
                     DateRangeStart = DateTime.Now.AddMonths(-6).Date,
                     DateRangeEnd = DateTime.Now.Date,
-                    Currency = Currency.Real,
+                    Currency = Currency.BRL,
                     Type = ExpenseType.Transport,
                     Month = PurchaseMonth.July
                 },
@@ -84,7 +84,7 @@ namespace ExpenseManager.Tests.ObjectGenerators
                     ValueStringRangeEnd = "20000.00",
                     DateRangeStart = DateTime.Now.AddMonths(-6).Date,
                     DateRangeEnd = DateTime.Now.Date,
-                    Currency = CurrencyVM.Real,
+                    Currency = CurrencyVM.BRL,
                     Type = ExpenseTypeVM.Transport,
                     Month = PurchaseMonthVM.July,
                 }
@@ -100,7 +100,7 @@ namespace ExpenseManager.Tests.ObjectGenerators
                     ValueStringRangeEnd = "20000.00",
                     DateRangeStart = DateTime.Now.AddMonths(-6).Date,
                     DateRangeEnd = DateTime.Now.Date,
-                    Currency = CurrencyVM.Real,
+                    Currency = CurrencyVM.BRL,
                     Type = ExpenseTypeVM.Transport,
                     Month = PurchaseMonthVM.July,
                 },
@@ -113,7 +113,7 @@ namespace ExpenseManager.Tests.ObjectGenerators
                     ValueRangeEnd = 20000,
                     DateRangeStart = DateTime.Now.AddMonths(-6).Date,
                     DateRangeEnd = DateTime.Now.Date,
-                    Currency = Currency.Real,
+                    Currency = Currency.BRL,
                     Type = ExpenseType.Transport,
                     Month = PurchaseMonth.July
                 }

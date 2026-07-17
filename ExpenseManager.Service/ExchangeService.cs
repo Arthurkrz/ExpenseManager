@@ -18,7 +18,7 @@ namespace ExpenseManager.Service
             _cacheService = cacheService;
         }
 
-        public async Task<Dictionary<string, decimal>> GetExchangeAsync() => 
+        public async Task<Dictionary<string, decimal>> GetExchangeAsync() =>
             (await _cacheService.GetOrCreateAsync(EXCHANGECACHEKEY, 
                 _exchangeProvider.GetExchangeOfDayAsync)).Rates ??
                     new Dictionary<string, decimal>();

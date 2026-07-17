@@ -88,7 +88,7 @@ namespace ExpenseManager.Tests
                 ValueRangeEnd = 150,
                 DateRangeStart = DateTime.Now.AddMonths(-1),
                 DateRangeEnd = DateTime.Now,
-                Currency = Currency.Real,
+                Currency = Currency.BRL,
                 Type = ExpenseType.Food,
                 Month = PurchaseMonth.February
             };
@@ -123,7 +123,7 @@ namespace ExpenseManager.Tests
             {
                 Id = new Guid(),
                 Name = "Almoço",
-                Currency = Currency.Euro,
+                Currency = Currency.EUR,
                 Value = 1000,
                 Type = ExpenseType.Food,
                 ExpenseDate = DateTime.Now,
@@ -160,7 +160,7 @@ namespace ExpenseManager.Tests
             {
                 Id = new Guid(),
                 Name = "Lunch",
-                Currency = Currency.Euro,
+                Currency = Currency.EUR,
                 Value = 1000,
                 Type = ExpenseType.Food,
                 ExpenseDate = DateTime.Now,

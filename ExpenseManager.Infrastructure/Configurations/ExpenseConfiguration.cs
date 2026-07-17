@@ -26,6 +26,7 @@ namespace ExpenseManager.Infrastructure.Configurations
 
             builder.Property(x => x.Value)
                    .HasColumnName("Value")
+                   .HasPrecision(9, 2)
                    .IsRequired();
 
             builder.Property(x => x.Type)

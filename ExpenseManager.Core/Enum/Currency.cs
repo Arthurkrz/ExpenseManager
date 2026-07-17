@@ -4,10 +4,22 @@ namespace ExpenseManager.Core.Enum
 {
     public enum Currency
     {
-        [Display(Name = "Euro")]
-        Euro,
+        [Display(Name = "American Dollar")]
+        USD,
 
-        [Display(Name = "Real")]
-        Real
+        [Display(Name = "Euro")]
+        EUR,
+
+        [Display(Name = "Brazilian Real")]
+        BRL,
+
+        [Display(Name = "British Pound")]
+        GBP,
+
+        [Display(Name = "Canadian Dollar")]
+        CAD,
+
+        [Display(Name = "Japanese Yen")]
+        JPY
     }
 }

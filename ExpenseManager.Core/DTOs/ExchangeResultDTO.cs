@@ -8,9 +8,6 @@ namespace ExpenseManager.Core.DTOs
     {
         [JsonPropertyName("date")]
         public DateTime Date { get; set; }
-
-        [JsonPropertyName("base")]
-        public string Base { get; set; }
         
         [JsonPropertyName("rates")]
         public Dictionary<string, decimal> Rates { get; set; }

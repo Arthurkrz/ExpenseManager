@@ -1,7 +1,7 @@
 ﻿using ExpenseManager.Core.Contracts.Repositories;
 using ExpenseManager.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Threading.Tasks;
 
 namespace ExpenseManager.Infrastructure.Repositories

@@ -29,21 +29,15 @@ namespace ExpenseManager.Web.Controllers
         public async Task<IActionResult> IndexAsync()
         {
             var expenses = await _expenseService.GetAllAsync();
-            var expensesVM = _mapper.Map<IEnumerable<Expense>, List<ExpenseViewModel>>(expenses);
 
-            ViewBag.Rates = await _exchangeService.GetExchangeAsync();
+            var expensesVM = _mapper.MapCollection<Expense, ExpenseViewModel>(
+                expenses, options => options.MapExpenseToViewModel());
 
-            decimal euroToRealRate = 5.50M;
-            decimal realToEuroRate = 1 / euroToRealRate;
+            var rates = await _exchangeService.GetExchangeAsync();
 
-            decimal totalInReais = expensesVM.Sum(bill => bill.Currency ==
-            CurrencyVM.Euro ? bill.Value * euroToRealRate : bill.Value);
+            var totalsByCurrency = CalculateTotalsByCurrency(expensesVM, rates);
 
-            decimal totalInEuros = expensesVM.Sum(bill => bill.Currency ==
-            CurrencyVM.Real ? bill.Value * realToEuroRate : bill.Value);
-
-            ViewBag.TotalInReais = totalInReais;
-            ViewBag.TotalInEuros = totalInEuros;
+            ViewBag.TotalsByCurrency = totalsByCurrency;
 
             return View(expensesVM);
         }
@@ -68,7 +62,8 @@ namespace ExpenseManager.Web.Controllers
                 return BadRequest(new { 
                     errors = GetModelStateErrors() });
 
-            var entity = _mapper.Map<ExpenseViewModel, Expense>(model);
+            var entity = _mapper.Map<ExpenseViewModel, Expense>(
+                model, options => options.MapViewModelToExpense());
 
             var result = await _expenseService.CreateExpenseAsync(entity);
 
@@ -130,6 +125,7 @@ namespace ExpenseManager.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
             var result = await _expenseService.DeleteExpenseAsync(id);
@@ -148,18 +144,48 @@ namespace ExpenseManager.Web.Controllers
         [HttpGet]
         public IActionResult Create() => View();
 
+        private Dictionary<string, decimal> CalculateTotalsByCurrency(IEnumerable<ExpenseViewModel> expenses, Dictionary<string, decimal> rates)
+        {
+            EnsureBaseRate(rates);
+
+            var totals = new Dictionary<string, decimal>();
+
+            foreach (var targetCurrency in Enum.GetNames<CurrencyVM>())
+            {
+                decimal total = expenses.Sum(expense =>
+                    ConvertCurrency(expense.Value,
+                        expense.Currency?.ToString(),
+                        targetCurrency, rates));
+
+                totals[targetCurrency] = total;
+            }
+
+            return totals;
+        }
+
+        private decimal ConvertCurrency(decimal amount, string sourceCurrency, string targetCurrency, Dictionary<string, decimal> rates) =>
+            string.IsNullOrWhiteSpace(sourceCurrency)
+            || sourceCurrency == targetCurrency
+            || !rates.TryGetValue(sourceCurrency, out var sourceRate)
+            || !rates.TryGetValue(targetCurrency, out var targetRate)
+            || sourceRate == 0
+                ? amount
+                : amount / sourceRate * targetRate;
+
+        private void EnsureBaseRate(Dictionary<string, decimal> rates) =>
+            rates.TryAdd("USD", 1.0m);
+
         private bool IsFilterViewModelEmpty(ExpenseFilterViewModel filterViewModel) =>
-            filterViewModel is null || string.IsNullOrWhiteSpace(filterViewModel.NameContains)
-                && string.IsNullOrWhiteSpace(filterViewModel.SourceContains)
-                && string.IsNullOrWhiteSpace(filterViewModel.ValueStringRangeStart)
-                && string.IsNullOrWhiteSpace(filterViewModel.ValueStringRangeEnd)
-                && filterViewModel.DateRangeStart is null
-                && filterViewModel.DateRangeEnd is null
-                && filterViewModel.Month is null
-                && filterViewModel.Currency is null
-                && filterViewModel.Type is null 
-                    ? true
-                    : false;
+            filterViewModel is null 
+            || string.IsNullOrWhiteSpace(filterViewModel.NameContains)
+            && string.IsNullOrWhiteSpace(filterViewModel.SourceContains)
+            && string.IsNullOrWhiteSpace(filterViewModel.ValueStringRangeStart)
+            && string.IsNullOrWhiteSpace(filterViewModel.ValueStringRangeEnd)
+            && filterViewModel.DateRangeStart is null
+            && filterViewModel.DateRangeEnd is null
+            && filterViewModel.Month is null
+            && filterViewModel.Currency is null
+            && filterViewModel.Type is null;
 
         private List<string> GetModelStateErrors() =>
             ModelState.Values.SelectMany(v => v.Errors)

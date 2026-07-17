@@ -4,28 +4,30 @@
         return;
     }
 
-    const totalInReais = parseFloat
-        ('@ViewBag.TotalInReais.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)') || 0;
-    const totalInEuros = parseFloat
-        ('@ViewBag.TotalInEuros.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)') || 0;
     const totalAmountElement = document.getElementById('totalAmount');
     const currencySelect = document.getElementById('currencySelect');
 
+    function formatCurrency(value, currency) {
+        return Number(value).toLocaleString("en-US", {
+            style: "currency",
+            currency: currency
+        });
+    }
+
     function updateTotalDisplay(currency) {
         if (!totalAmountElement) return;
-        if (currency === 'BRL') {
-            totalAmountElement.innerHTML =
-                `Total value - R$ ${totalInReais.toFixed(2)}`;
-        } else if (currency === 'EUR') {
-            totalAmountElement.innerHTML =
-                `Total value - € ${totalInEuros.toFixed(2)}`;
-        }
+
+        const total = window.expenseTotals?.[currency] ?? 0;
+
+        totalAmountElement.innerHTML =
+            `Total value - ${formatCurrency(total, currency)}`;
     }
 
     if (currencySelect) {
-        currencySelect.value = 'BRL';
-        updateTotalDisplay('BRL');
-        currencySelect.addEventListener('change', function () {
+        currencySelect.value = "USD";
+        updateTotalDisplay(currencySelect.value);
+
+        currencySelect.addEventListener("change", function () {
             updateTotalDisplay(this.value);
         });
     }
@@ -35,6 +37,10 @@
             $("#addExpenseButton").focus();
         }, 100);
     });
+
+    enableValidation();
+    registerCreateHandler();
+    registerEditHandler();
 });
 
 function enableValidation() {
@@ -42,86 +48,90 @@ function enableValidation() {
     if (form.length === 0) {
         console.error("Form not found.");
     }
+
     $.validator.unobtrusive.parse(form);
 }
 
-enableValidation();
+function registerCreateHandler() {
+    $(document).on("submit", "#createExpenseForm", function (e) {
+        e.preventDefault();
 
-$(document).on("click", "#saveExpenseButton", function (e) {
-    e.preventDefault();
+        console.log("create form submit triggered.");
 
-    let form = $("#createExpenseForm");
-    if (form.length === 0) {
-        console.error("Form not found.");
-        return
-    }
+        const form = $(this);
+        const errorContainer = $("#errorMessages");
 
-    form.validate();
+        errorContainer.addClass("d-none").empty();
 
-    if (!form.valid()) {
-        console.warn("Form validation failed.");
-        return;
-    }
+        if ($.validator && !form.valid()) {
+            console.warn("create forn valid failed,");
+            return;
+        }
 
-    $.ajax({
-        url: "/Expense/Create",
-        type: "POST",
-        data: form.serialize(),
-        success: function (response) {
-            if (response.success) {
-                $("#createExpenseModal").modal("hide");
-                location.reload();
-            } else {
-                let errorContainer = $("#errorMessages");
-                if (response.errors && response.errors.length > 0) {
-                    errorContainer.html(response.errors.join("<br>"));
-                    errorContainer.removeClass("d-none").show();
-                } else {
-                    errorContainer.html("Unknown error.");
-                    errorContainer.removeClass("d-none").show();
+        $.ajax({
+            url: form.attr("action"),
+            type: "POST",
+            data: form.serialize(),
+            success: function (response) {
+                if (response.success) {
+                    $("#createExpenseModal").modal("hide");
+                    location.reload();
                 }
+            },
+
+            error: function (xhr) {
+                const errors = xhr.responseJSON?.errors;
+
+                if (errors && errors.length > 0) {
+                    errorContainer.html(errors.join("<br>"));
+                } else {
+                    errorContainer.html("Error when processing request.");
+                }
+
+                errorContainer.removeClass("d-none").show();
             }
-        },
-        error: function () {
-            let errorContainer = $("#errorMessages");
-            errorContainer.html("Error when processing request.");
-            errorContainer.removeClass("d-none").show();
-        }
+        });
     });
-});
 
-$(document).on("click", "[id^='saveEditButton-']", function (e) {
-    e.preventDefault();
+}
 
-    let buttonId = $(this).attr("id");
-    let expenseId = buttonId.replace("saveEditButton-", "");
+function registerEditHandler() {
+    $(document).on("click", "[id^='saveEditButton-']", function (e) {
+        e.preventDefault();
 
-    let form = $("#editExpenseForm-" + expenseId);
+        const buttonId = $(this).attr("id");
+        const expenseId = buttonId.replace("saveEditButton-", "");
+        
+        const form = $("#editExpenseForm-" + expenseId);
 
-    form.validate();
 
-    if (!form.valid()) {
-        return;
-    }
+        if ($.validator && !form.valid()) {
+            return;
+        }
 
-    $.ajax({
-        url: "/Expense/Update",
-        type: "POST",
-        data: form.serialize(),
-        success: function (response) {
-            if (response.success) {
-                $("#editModal-" + expenseId).modal("hide");
-                location.reload();
-            } else {
-                $("#editErrorMessages-" + expenseId)
-                    .html(response.errors.join("<br>"))
-                    .removeClass("d-none").show();
+        $.ajax({
+            url: "/Expense/Update",
+            type: "POST",
+            data: form.serialize(),
+            success: function (response) {
+                if (response.success) {
+                    $("#editModal-" + expenseId).modal("hide");
+                    location.reload();
+                }
+            },
+
+            error: function (xhr) {
+                const errors = xhr.responseJSON?.errors;
+                const errorContainer = $("#editErrorMessages-" + expenseId);
+
+                if (errors && errors.length > 0) {
+                    errorContainer.html(errors.join("<br>"));
+                } else {
+                    errorContainer.html("Error when processing request.");
+                }
+
+                errorContainer.removeClass("d-none").show();
             }
-        },
-        error: function () {
-            $("#editErrorMessages-" + expenseId)
-                .html("Error when processing request.")
-                .removeClass("d-none").show();
-        }
+        });
     });
-});
+}

@@ -12,6 +12,12 @@ namespace ExpenseManager.Web.Mapping.CustomMappings
                 source => source.Value,
                 target => target.ValueString,
                 MappingConverters.MoneyToString
+            )
+            .MapProperty
+            (
+                source => source.ExpenseDate,
+                target => target.ExpenseDate,
+                value => value
             );
 
         public static MappingOptions<ExpenseViewModel, Expense> MapViewModelToExpense(this MappingOptions<ExpenseViewModel, Expense> options) =>
@@ -20,6 +26,12 @@ namespace ExpenseManager.Web.Mapping.CustomMappings
                 source => source.ValueString,
                 target => target.Value,
                 MappingConverters.StringToMoney
+            )
+            .MapProperty
+            (
+                source => source.ExpenseDate,
+                target => target.ExpenseDate,
+                value => value!.Value
             );
     }
 }

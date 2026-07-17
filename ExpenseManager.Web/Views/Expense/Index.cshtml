@@ -1,25 +1,41 @@
 ﻿@using ExpenseManager.Web.Models
+@using System.Text.Json
 @model List<ExpenseViewModel>
+
 @{
-    var model = Model.FirstOrDefault();
+    ViewData["Title"] = "Expenses"; 
+}
+
+@{
     var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
+
+    var totalsByCurrency = ViewBag.TotalsByCurrency as 
+        Dictionary<string, decimal> ?? 
+            new Dictionary<string, decimal>();
 }
 
 @section Scripts {
-    <script src="~/js/Expense/Index.js"></script>
+    <script>
+        window.expenseTotals = @Html.Raw(JsonSerializer.Serialize(totalsByCurrency))
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="~/js/Expense/Index.js" asp-append-version="true"></script>
 }
 
 @if (!string.IsNullOrEmpty(successMessage))
 {
     <div id="successAlert" class="alert alert-success"
-        role="alert"
-        style="position: fixed; top: 20px; left: 50%; 
+    role="alert"
+    style="position: fixed; top: 20px; left: 50%; 
         transform: translateX(-50%); max-width: 500px; z-index: 1050;">
         <div style="text-align: center;">@successMessage</div>
 
         <div class="progress mt-2" style="height: 6px;">
             <div id="successProgressBar" class="progress-bar progress-bar-animated"
-                role="progressbar" style="width: 0%;">
+            role="progressbar" style="width: 0%;">
             </div>
         </div>
     </div>
@@ -54,6 +70,13 @@
     </script>
 }
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger text-center" role="alert">
+        @Html.Raw(errorMessage)
+    </div>
+}
+
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="m-0" style="font-size: 16px;">
@@ -81,8 +104,13 @@
 <div class="d-flex align-items-center mt-1">
     <label for="currencySelect" style="margin-left: 15px;" 
         class="me-2 mb-0">Display total in:</label>
+
     <select id="currencySelect" class="form-select w-auto">
-        <option value="BRL" selected>BRL (R$)</option>
+        <option value="USD" selected>American Dollars ($)</option>
         <option value="EUR">Euros (€)</option>
+        <option value="BRL">Brazilian Reais (R$)</option>
+        <option value="GBP">British Pounds (£)</option>
+        <option value="CAD">Canadian Dollars ($)</option>
+        <option value="JPY">Japanese Yen (¥)</option>
     </select>
 </div>

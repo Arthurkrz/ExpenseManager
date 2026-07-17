@@ -1,7 +1,7 @@
 ﻿@using ExpenseManager.Web.Models
 @using ExpenseManager.Web.Models.Enum
 @model ExpenseViewModel
-@{ var value = Model.ValueString.Replace(',', '.'); }
+@{ var value = Model.ValueString?.Replace(',', '.') ?? string.Empty; }
 
 <div class="modal fade" id="editModal-@Model.Id" tabindex="-1" 
      aria-labelledby="modalLabel-@Model.Id" aria-hidden="true">
@@ -9,14 +9,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalLabel-@Model.Id">
-                Edit expense - @Model.Name</h5>
+                Edit expense</h5>
                 <button type="button" class="btn-close" 
                     data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="padding-top: 1px;">
                 <form method="post" asp-action="Update" asp-controller="Expense" 
                       id="editExpenseForm-@Model.Id" novalidate>
-                    <div id="editErrorMessages" class="alert alert-danger d-none"></div>
+                    <div id="editErrorMessages-@Model.Id" class="alert alert-danger d-none"></div>
                     <input type="hidden" name="Id" value="@Model.Id" asp-for="Id" />
 
                     <div class="row mt-1">
@@ -30,8 +30,7 @@
                         <div class="col-6">
                             <label asp-for="ExpenseDate"
                                 class="form-label">Expense date</label>
-                            <input asp-for="ExpenseDate" class="form-control mt-1" type="date" 
-                                value="@Model.ExpenseDate.ToString("yyyy-MM-dd")" />
+                            <input asp-for="ExpenseDate" class="form-control mt-1" type="date"/>
                             <span asp-validation-for="ExpenseDate" class="text-danger"></span>
                         </div>
                     </div>

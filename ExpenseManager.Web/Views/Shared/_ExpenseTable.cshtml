@@ -1,20 +1,19 @@
 ﻿@using ExpenseManager.Web.Models
 @model IEnumerable<ExpenseViewModel>
-@{ var model = Model.FirstOrDefault(); }
 
 @if (Model.Any())
 {
     <div class="row">
         <div class="col-12">
-            <table class="table table-striped table-hover text-center flex-column">
+            <table class="table table-striped table-hover text-center">
                 <thead>
                     <tr>
-                        <th>@Html.DisplayNameFor(x => model.Name)</th>
-                        <th>@Html.DisplayNameFor(x => model.Type)</th>
-                        <th>@Html.DisplayNameFor(x => model.Currency)</th>
-                        <th>@Html.DisplayNameFor(x => model.Value)</th>
-                        <th>@Html.DisplayNameFor(x => model.Source)</th>
-                        <th>@Html.DisplayNameFor(x => model.ExpenseDate)</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Currency</th>
+                        <th>Value</th>
+                        <th>Source</th>
+                        <th>Date of expense</th>
                         <td></td>
                     </tr>
                 </thead>
@@ -22,12 +21,12 @@
                     @foreach (var expense in Model)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(x => expense.Name)</td>
-                            <td>@Html.DisplayFor(x => expense.Type)</td>
-                            <td>@Html.DisplayFor(x => expense.Currency)</td>
-                            <td>@Html.DisplayFor(x => expense.Value)</td>
-                            <td>@Html.DisplayFor(x => expense.Source)</td>
-                            <td>@Html.DisplayFor(x => expense.ExpenseDate)</td>
+                            <td>@expense.Name</td>
+                            <td>@expense.Type</td>
+                            <td>@expense.Currency</td>
+                            <td>@expense.ValueString</td>
+                            <td>@expense.Source</td>
+                            <td>@expense.ExpenseDate?.ToString("dd/MM/yyyy")</td>
                             <td>
                                 <button style="margin-left: 10px" type="button" 
                                     class="btn p-0 border-0 bg-transparent" 
@@ -53,7 +52,7 @@
 }
 else
 {
-    <h1 style="text-align: center; font-weight: bold; font-size: 24px; margin-right: 85px; padding-top: 50px;">
+    <h1 style="text-align: center; font-weight: bold; font-size: 24px; margin-right: 55px; padding-top: 50px;">
         No expenses found!
     </h1>
 }

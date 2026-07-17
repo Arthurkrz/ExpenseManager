@@ -10,8 +10,6 @@ namespace ExpenseManager.ExternalServices.Settings
         
         public string AccessKey { get; set; } = string.Empty;
         
-        public string BaseCurrency { get; set; } = "USD";
-        
         public List<string> Symbols { get; set; } = [];
     }
 }

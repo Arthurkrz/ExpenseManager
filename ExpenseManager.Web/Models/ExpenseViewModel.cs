@@ -17,7 +17,7 @@ namespace ExpenseManager.Web.Models
 
         [Required(ErrorMessage = "Currency is required.")]
         [DisplayName("Currency")]
-        public CurrencyVM Currency { get; set; }
+        public CurrencyVM? Currency { get; set; }
 
         [DisplayName("Value")]
         [DisplayFormat(DataFormatString = "{0:F2}", ApplyFormatInEditMode = true)]
@@ -25,6 +25,8 @@ namespace ExpenseManager.Web.Models
         {
             get
             {
+                if (string.IsNullOrWhiteSpace(ValueString)) return 0m;
+
                 string valueString = ValueString.Replace(',', '.');
                 decimal.TryParse(valueString,
                     NumberStyles.Currency, 
@@ -39,7 +41,7 @@ namespace ExpenseManager.Web.Models
 
         [Required(ErrorMessage = "Expense category is required.")]
         [DisplayName("Category")]
-        public ExpenseTypeVM Type { get; set; }
+        public ExpenseTypeVM? Type { get; set; }
 
         [Required(ErrorMessage = "Source of expense is required.")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Expense source must have more than 2 characters.")]
@@ -49,7 +51,6 @@ namespace ExpenseManager.Web.Models
         [Required(ErrorMessage = "Date of expense is required.")]
         [DisplayName("Date of expense")]
         [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
-        public DateTime ExpenseDate { get; set; }
+        public DateTime? ExpenseDate { get; set; }
     }
 }

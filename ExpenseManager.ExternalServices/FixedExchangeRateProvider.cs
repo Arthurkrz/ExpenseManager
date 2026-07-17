@@ -21,7 +21,6 @@ namespace ExpenseManager.ExternalServices
             var result = new ExchangeResultDTO
             {
                 Date = DateTime.UtcNow.Date,
-                Base = _settings.BaseCurrency,
                 Rates = _settings.Fixed
             };
 

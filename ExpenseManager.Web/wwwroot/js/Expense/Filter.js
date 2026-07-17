@@ -33,7 +33,6 @@
 
     valueLabel.addEventListener("mouseleave", () => hideSidebar(valueSidebar));
     valueSidebar.addEventListener("mouseleave", () => hideSidebar(valueSidebar));
-
 });
 
 $(document).ready(function () {
@@ -45,7 +44,7 @@ $(document).ready(function () {
             SourceContains: $("#SourceContains").val(),
             Currency: $("#Currency").val(),
             Type: $("#Type").val(),
-            Month: $("#Month").val(),
+            Month: $("#monthSelect").val(),
             DateRangeStart: $("#DateRangeStart").val(),
             DateRangeEnd: $("#DateRangeEnd").val(),
             ValueStringRangeStart: $("#ValueStringRangeStart").val(),
@@ -75,5 +74,20 @@ $(document).ready(function () {
                 errorContainer.removeClass("d-none").show();
             }
         });
+    });
+
+    $("#clearFiltersButton").on("click", function () {
+        $("#NameContains").val("");
+        $("#SourceContains").val("");
+        $("#Currency").val("");
+        $("#Type").val("");
+        $("#monthSelect").val("");
+        $("#DateRangeStart").val("");
+        $("#DateRangeEnd").val("");
+        $("#ValueStringRangeStart").val("");
+        $("#ValueStringRangeEnd").val("");
+
+        $("#filteredResults").empty();
+        $("#errorMessages").addClass("d-none").empty();
     });
 });

@@ -11,13 +11,13 @@ namespace ExpenseManager.Web.Mapping.CustomMappings
             (
                 source => source.ValueStringRangeStart,
                 target => target.ValueRangeStart,
-                MappingConverters.StringToMoney
+                MappingConverters.StringToNullableMoney
             )
             .MapProperty
             (
                 source => source.ValueStringRangeEnd,
                 target => target.ValueRangeEnd,
-                MappingConverters.StringToMoney
+                MappingConverters.StringToNullableMoney
             );
     }
 }

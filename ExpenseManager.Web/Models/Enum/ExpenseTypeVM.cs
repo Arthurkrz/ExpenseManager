@@ -19,10 +19,13 @@ namespace ExpenseManager.Web.Models.Enum
         [Display(Name = "Services")]
         Services,
 
+        [Display(Name = "Electronics")]
+        Electronics,
+
         [Display(Name = "Debts")]
         Debts,
 
-        [Display(Name = "Loans")]
-        Loan
+        [Display(Name = "Miscellaneous")]
+        Miscellaneous
     }
 }
