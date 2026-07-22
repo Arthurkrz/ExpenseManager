@@ -9,6 +9,9 @@ namespace ExpenseManager.Service.PredicateBuilder
     {
         public static Expression<Func<Expense, bool>> Build(ExpenseFilter filter)
         {
+            var dateRangeStart = filter.DateRangeStart ?? DateTime.Now.AddYears(-1);
+            var dateRangeEnd = filter.DateRangeEnd ?? DateTime.Now;
+
             Expression<Func<Expense, bool>> predicate = b => true;
 
             if (!string.IsNullOrEmpty(filter.NameContains))
@@ -29,13 +32,9 @@ namespace ExpenseManager.Service.PredicateBuilder
                 predicate = predicate.And(b => b.Value <= 
                     filter.ValueRangeEnd.Value);
 
-            if (filter.DateRangeStart.HasValue)
-                predicate = predicate.And(b => b.ExpenseDate >= 
-                    filter.DateRangeStart.Value);
-
-            if (filter.DateRangeEnd.HasValue)
-                predicate = predicate.And(b => b.ExpenseDate <= 
-                    filter.DateRangeEnd.Value);
+            predicate = predicate.And(b =>
+                b.ExpenseDate >= dateRangeStart &&
+                b.ExpenseDate <= dateRangeEnd);
 
             if (filter.Currency.HasValue)
                 predicate = predicate.And(b => b.Currency == 

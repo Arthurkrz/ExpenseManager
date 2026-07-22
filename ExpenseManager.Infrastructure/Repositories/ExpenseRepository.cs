@@ -1,27 +1,74 @@
-﻿using ExpenseManager.Core.Contracts.Repositories;
+﻿using ExpenseManager.Core.Common;
+using ExpenseManager.Core.Contracts.Repositories;
 using ExpenseManager.Core.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using System;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Collections.Generic;
+using LinqKit;
 
 namespace ExpenseManager.Infrastructure.Repositories
 {
-    public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository
+    public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository 
     {
         private readonly Context _context;
-
+        
         public ExpenseRepository(Context context) : base(context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<Expense>> GetExpensesWithFilterAsync(Expression<Func<Expense, bool>> predicate) =>
-            await _context.Set<Expense>().Where(predicate).ToListAsync();
+        public async Task<PaginatedResult<Expense>> GetExpensesPagedAsync(int pageNumber, int pageSize)
+        {
+            pageNumber = pageNumber <= 0 ? 1 : pageNumber;
+            pageSize = NormalizePageSize(pageSize);
 
-        public async Task<Expense> GetByIdAsync(Guid id) =>
-            (await GetAllAsync()).FirstOrDefault(b => b.Id == id);
+            var query = _context.Set<Expense>().AsNoTracking()
+                .OrderByDescending(e => e.ExpenseDate);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query.Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize).ToListAsync();
+
+            return new PaginatedResult<Expense>
+            {
+                Items = items,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<PaginatedResult<Expense>> GetExpensesWithFilterPagedAsync(Expression<Func<Expense, bool>> predicate, int pageNumber, int pageSize)
+        {
+            pageNumber = pageNumber <= 0 ? 1 : pageNumber;
+            pageSize = pageSize <= 0 ? 10 : pageSize;
+
+            var query = _context.Set<Expense>().AsNoTracking()
+                .Where(predicate).OrderByDescending(e => e.ExpenseDate);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query.Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize).ToListAsync();
+
+            return new PaginatedResult<Expense>
+            {
+                Items = items,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
+        }
+
+        private static int NormalizePageSize(int pageSize)
+        {
+            if (pageSize <= 0) return 10;
+
+            return pageSize > 100 ? 100 : pageSize;
+        }
     }
 }

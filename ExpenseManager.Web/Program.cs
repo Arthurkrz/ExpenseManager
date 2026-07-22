@@ -27,6 +27,7 @@ services.AddControllersWithViews();
 services.InjectDependencies(configuration);
 
 services.AddSingleton<IObjectMapper, ObjectMapper>();
+services.AddSingleton<IPaginatedViewModelMapper, PaginatedViewModelMapper>();
 
 var app = builder.Build();
 

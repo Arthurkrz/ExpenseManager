@@ -1,9 +1,10 @@
-﻿using ExpenseManager.Core.Contracts.Services;
+﻿using ExpenseManager.Core.Common;
+using ExpenseManager.Core.Contracts.Services;
 using ExpenseManager.Core.Entities;
 using ExpenseManager.Web.Mapping.Contracts;
 using ExpenseManager.Web.Mapping.CustomMappings;
 using ExpenseManager.Web.Models;
-using ExpenseManager.Web.Models.Enum;
+using ExpenseManager.Web.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -15,44 +16,72 @@ namespace ExpenseManager.Web.Controllers
     public class ExpenseController : Controller
     {
         private readonly IExpenseService _expenseService;
+        private readonly IExpenseSummaryService _expenseSummaryService;
+        private readonly IPaginatedViewModelMapper _paginatedViewModelMapper;
         private readonly IObjectMapper _mapper;
         private readonly IExchangeService _exchangeService;
 
-        public ExpenseController(IExpenseService expenseService, IObjectMapper mapper, IExchangeService exchangeService)
+        public ExpenseController(IExpenseService expenseService, IExpenseSummaryService expenseSummaryService, IPaginatedViewModelMapper paginatedViewModelMapper, IObjectMapper mapper, IExchangeService exchangeService)
         {
             _expenseService = expenseService;
+            _expenseSummaryService = expenseSummaryService;
+            _paginatedViewModelMapper = paginatedViewModelMapper;
             _mapper = mapper;
             _exchangeService = exchangeService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> IndexAsync()
+        public async Task<IActionResult> IndexAsync(int pageNumber = 1, int pageSize = 10)
         {
-            var expenses = await _expenseService.GetAllAsync();
+            var paginatedExpenses = await _expenseService
+                .GetPagedAsync(pageNumber, pageSize);
 
-            var expensesVM = _mapper.MapCollection<Expense, ExpenseViewModel>(
-                expenses, options => options.MapExpenseToViewModel());
+            var viewModel = _paginatedViewModelMapper.
+                ToExpensePaginatedViewModel(paginatedExpenses);
 
             var rates = await _exchangeService.GetExchangeAsync();
 
-            var totalsByCurrency = CalculateTotalsByCurrency(expensesVM, rates);
+            var pageSourceTotals = CurrencyTotalCalculator
+                .GroupTotalsBySourceCurrency(viewModel.Items);
 
-            ViewBag.TotalsByCurrency = totalsByCurrency;
+            var pageTotalsByCurrency = CurrencyTotalCalculator
+                .CalculateTotalsByCurrency(pageSourceTotals, rates);
 
-            return View(expensesVM);
+            var allSourceTotals = await _expenseSummaryService
+                .GetTotalsByCurrencyAsync();
+
+            var allTotalsByCurrency = CurrencyTotalCalculator.
+                CalculateTotalsByCurrency(allSourceTotals.TotalsByCurrency, rates);
+
+            ViewBag.PageTotalsByCurrency = pageTotalsByCurrency;
+            ViewBag.AllTotalsByCurrency = allTotalsByCurrency;
+
+            return View(viewModel);
         }
 
         [HttpGet]
-        public IActionResult FilterAsync()
+        public async Task<IActionResult> FilterAsync(ExpenseFilterViewModel filterViewModel)
         {
-            var filterViewModel = new ExpenseFilterViewModel
-            {
-                ValueStringRangeStart = string.Empty,
-                ValueStringRangeEnd = string.Empty,
-                Expenses = []
-            };
+            if (IsFilterViewModelEmpty(filterViewModel))
+                return BadRequest(new
+                { 
+                    errors = new List<string> 
+                    { "Add at least 1 search parameter." } 
+                });
+            
+            var filterModel = _mapper.Map<ExpenseFilterViewModel, ExpenseFilter>(
+                filterViewModel, options => { options.MapViewModelToFilter(); });
 
-            return View(filterViewModel);
+            var response = await _expenseService.GetExpensesWithFilterPagedAsync(filterModel);
+
+            if (!response.Success) 
+                return BadRequest(new 
+                { errors = response.Errors });
+
+            var viewModel = _paginatedViewModelMapper
+                .ToExpensePaginatedViewModel(response.Data);
+
+            return PartialView("_ExpenseTable", viewModel);
         }
 
         [HttpPost]
@@ -73,29 +102,6 @@ namespace ExpenseManager.Web.Controllers
             TempData["SuccessMessage"] = "Expense registered successfully!";
 
             return Ok(new { success = true });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> FilterAsync(ExpenseFilterViewModel filterViewModel)
-        {
-            if (IsFilterViewModelEmpty(filterViewModel))
-                return BadRequest(new { errors = new List<string> 
-                    { "Add at least 1 search parameter." } });
-
-            var filterModel = _mapper.Map<ExpenseFilterViewModel, ExpenseFilter>(
-                filterViewModel, options => { options.MapViewModelToFilter(); });
-
-            var response = await _expenseService.GetExpensesWithFilterAsync(filterModel);
-
-            if (!response.Success) return BadRequest(
-                new { errors = response.Errors });
-
-            IEnumerable<Expense> expenses = response.Data ?? [];
-
-            var expensesViewModel = _mapper.MapCollection<Expense, ExpenseViewModel>(
-                expenses, options => options.MapExpenseToViewModel());
-
-            return PartialView("_ExpenseTable", expensesViewModel);
         }
 
         [HttpPost]
@@ -143,37 +149,6 @@ namespace ExpenseManager.Web.Controllers
 
         [HttpGet]
         public IActionResult Create() => View();
-
-        private Dictionary<string, decimal> CalculateTotalsByCurrency(IEnumerable<ExpenseViewModel> expenses, Dictionary<string, decimal> rates)
-        {
-            EnsureBaseRate(rates);
-
-            var totals = new Dictionary<string, decimal>();
-
-            foreach (var targetCurrency in Enum.GetNames<CurrencyVM>())
-            {
-                decimal total = expenses.Sum(expense =>
-                    ConvertCurrency(expense.Value,
-                        expense.Currency?.ToString(),
-                        targetCurrency, rates));
-
-                totals[targetCurrency] = total;
-            }
-
-            return totals;
-        }
-
-        private decimal ConvertCurrency(decimal amount, string sourceCurrency, string targetCurrency, Dictionary<string, decimal> rates) =>
-            string.IsNullOrWhiteSpace(sourceCurrency)
-            || sourceCurrency == targetCurrency
-            || !rates.TryGetValue(sourceCurrency, out var sourceRate)
-            || !rates.TryGetValue(targetCurrency, out var targetRate)
-            || sourceRate == 0
-                ? amount
-                : amount / sourceRate * targetRate;
-
-        private void EnsureBaseRate(Dictionary<string, decimal> rates) =>
-            rates.TryAdd("USD", 1.0m);
 
         private bool IsFilterViewModelEmpty(ExpenseFilterViewModel filterViewModel) =>
             filterViewModel is null 

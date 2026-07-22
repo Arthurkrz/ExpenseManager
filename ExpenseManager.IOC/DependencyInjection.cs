@@ -33,6 +33,7 @@ namespace ExpenseManager.IOC
         {
             services.AddScoped<IExpenseService, ExpenseService>();
             services.AddScoped<IExchangeService, ExchangeService>();
+            services.AddScoped<IExpenseSummaryService, ExpenseSummaryService>();
 
             return services;
         }
@@ -40,6 +41,7 @@ namespace ExpenseManager.IOC
         public static IServiceCollection InjectRepositories(this IServiceCollection services)
         {
             services.AddScoped<IExpenseRepository, ExpenseRepository>();
+            services.AddScoped<IExpenseSummaryRepository, ExpenseSummaryRepository>();
             
             return services;
         }

@@ -96,11 +96,12 @@ namespace ExpenseManager.Tests
             var filterExpression = ExpensePredicateBuilder.Build(expenseFilter);
 
             // Act & Assert
-            Assert.True((await _sut.GetExpensesWithFilterAsync(expenseFilter)).Success);
+            Assert.True((await _sut.GetExpensesWithFilterPagedAsync(expenseFilter)).Success);
             Assert.NotNull(filterExpression);
 
-            _mockRepository.Verify(x => x.GetExpensesWithFilterAsync(
-                It.IsAny<Expression<Func<Expense, bool>>>()), Times.AtLeastOnce);
+            _mockRepository.Verify(x => x.GetExpensesWithFilterPagedAsync(
+                It.IsAny<Expression<Func<Expense, bool>>>(), 
+                It.IsAny<int>(), It.IsAny<int>()), Times.AtLeastOnce);
         }
 
         [Theory]
@@ -108,7 +109,7 @@ namespace ExpenseManager.Tests
         public async Task GetExpensesWithFilter_MustReturnError_WhenInvalidFilter(ExpenseFilter expenseFilter, string errorMessage)
         {
             // Act
-            var result = await _sut.GetExpensesWithFilterAsync(expenseFilter);
+            var result = await _sut.GetExpensesWithFilterPagedAsync(expenseFilter);
 
             // Assert
             Assert.False(result.Success);
@@ -204,7 +205,7 @@ namespace ExpenseManager.Tests
         public async Task List_MustCallRepository()
         {
             // Act & Assert
-            Assert.NotNull(await _sut.GetAllAsync());
+            Assert.NotNull(await _sut.GetPagedAsync(1, 1));
         }
     }
 }

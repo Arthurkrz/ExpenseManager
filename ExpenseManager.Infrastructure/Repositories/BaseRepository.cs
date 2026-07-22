@@ -1,7 +1,7 @@
 ﻿using ExpenseManager.Core.Contracts.Repositories;
 using ExpenseManager.Core.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+using System;
 using System.Threading.Tasks;
 
 namespace ExpenseManager.Infrastructure.Repositories
@@ -35,7 +35,8 @@ namespace ExpenseManager.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<T>> GetAllAsync() =>
-            await _context.Set<T>().ToListAsync();
+        public async Task<T> GetByIdAsync(Guid id) =>
+            await _context.Set<T>().AsNoTracking().
+                FirstOrDefaultAsync(e => e.Id == id);
     }
 }

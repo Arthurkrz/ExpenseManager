@@ -1,4 +1,5 @@
-﻿using ExpenseManager.Core.Contracts.Repositories;
+﻿using ExpenseManager.Core.Common;
+using ExpenseManager.Core.Contracts.Repositories;
 using ExpenseManager.Core.Contracts.Services;
 using ExpenseManager.Core.Entities;
 using ExpenseManager.Service.PredicateBuilder;
@@ -6,7 +7,6 @@ using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace ExpenseManager.Service
@@ -43,28 +43,6 @@ namespace ExpenseManager.Service
             return new ServiceResponse { Success = true };
         }
 
-        public async Task<IEnumerable<Expense>> GetAllAsync() =>
-            await _expenseRepository.GetAllAsync();
-
-        public async Task<ServiceResponseGeneric<IEnumerable<Expense>>> GetExpensesWithFilterAsync(ExpenseFilter filter)
-        {
-            var validationResult = _validatorExpenseFilter.Validate(filter);
-
-            if (!validationResult.IsValid)
-                return new ServiceResponseGeneric<IEnumerable<Expense>>
-                { Success = false, Errors = validationResult
-                    .Errors.Select(e => e.ErrorMessage).ToList() };
-
-            Expression<Func<Expense, bool>> filterExpression = 
-                ExpensePredicateBuilder.Build(filter);
-
-            var expenses = await _expenseRepository.
-                GetExpensesWithFilterAsync(filterExpression);
-
-            return new ServiceResponseGeneric<IEnumerable<Expense>>
-                { Success = true, Data = expenses };
-        }
-
         public async Task<ServiceResponse> UpdateExpenseAsync(Expense expense)
         {
             var existingExpense = await _expenseRepository.GetByIdAsync(expense.Id);
@@ -94,6 +72,30 @@ namespace ExpenseManager.Service
             await _expenseRepository.DeleteAsync(entity);
 
             return new ServiceResponse { Success = true };
+        }
+
+        public async Task<PaginatedResult<Expense>> GetPagedAsync(int pageNumber, int pageSize) =>
+            await _expenseRepository.GetExpensesPagedAsync(pageNumber, pageSize);
+
+        public async Task<ServiceResponseGeneric<PaginatedResult<Expense>>> GetExpensesWithFilterPagedAsync(ExpenseFilter filter)
+        {
+            var validationResult = _validatorExpenseFilter.Validate(filter);
+
+            if (!validationResult.IsValid)
+                return new ServiceResponseGeneric<PaginatedResult<Expense>>
+                {
+                    Success = false,
+                    Errors = validationResult
+                    .Errors.Select(e => e.ErrorMessage).ToList()
+                };
+
+            var filterExpression = ExpensePredicateBuilder.Build(filter);
+
+            var expenses = await _expenseRepository.GetExpensesWithFilterPagedAsync(
+                filterExpression, filter.PageNumber, filter.PageSize);
+
+            return new ServiceResponseGeneric<PaginatedResult<Expense>>
+                { Success = true, Data = expenses };
         }
     }
 }

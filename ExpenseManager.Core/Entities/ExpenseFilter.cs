@@ -14,7 +14,7 @@ namespace ExpenseManager.Core.Entities
         public decimal? ValueRangeEnd { get; set; }
         
         public DateTime? DateRangeStart { get; set; }
-        
+
         public DateTime? DateRangeEnd { get; set; }
         
         public Currency? Currency { get; set; }
@@ -22,5 +22,9 @@ namespace ExpenseManager.Core.Entities
         public ExpenseType? Type { get; set; }
         
         public PurchaseMonth? Month { get; set; }
+
+        public int PageNumber { get; set; }
+
+        public int PageSize { get; set; }
     }
 }

@@ -1,6 +1,6 @@
-﻿using ExpenseManager.Core.Entities;
+﻿using ExpenseManager.Core.Common;
+using ExpenseManager.Core.Entities;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ExpenseManager.Core.Contracts.Services
@@ -13,8 +13,8 @@ namespace ExpenseManager.Core.Contracts.Services
 
         Task<ServiceResponse> DeleteExpenseAsync(Guid id);
 
-        Task<ServiceResponseGeneric<IEnumerable<Expense>>> GetExpensesWithFilterAsync(ExpenseFilter filter);
+        Task<PaginatedResult<Expense>> GetPagedAsync(int pageNumber, int pageSize);
 
-        Task<IEnumerable<Expense>> GetAllAsync();
+        Task<ServiceResponseGeneric<PaginatedResult<Expense>>> GetExpensesWithFilterPagedAsync(ExpenseFilter filter);
     }
 }
