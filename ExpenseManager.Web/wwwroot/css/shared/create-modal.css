@@ -1,0 +1,14 @@
+﻿.create-modal-body {
+    padding-top: 1px;
+}
+
+.create-modal-textarea {
+    height: 50px;
+    resize: vertical;
+}
+
+.create-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}

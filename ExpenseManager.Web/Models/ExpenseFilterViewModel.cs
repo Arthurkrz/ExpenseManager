@@ -64,5 +64,9 @@ namespace ExpenseManager.Web.Models
         public PurchaseMonthVM? Month { get; set; }
 
         public List<ExpenseViewModel> Expenses { get; set; } = [];
+
+        public int PageNumber { get; set; } = 1;
+
+        public int PageSize { get; set; } = 10;
     }
 }

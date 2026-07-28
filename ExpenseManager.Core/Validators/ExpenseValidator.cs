@@ -12,6 +12,10 @@ namespace ExpenseManager.Core.Validators
                 !string.IsNullOrEmpty(n))
                .WithMessage("Name is required");
 
+            RuleFor(b => b.Name)
+                .MaximumLength(50)
+                .WithMessage("Expense name must be less than 50 characters");
+
             RuleFor(b => b.Currency)
                 .NotNull()
                 .WithMessage("Currency is required");
@@ -39,6 +43,10 @@ namespace ExpenseManager.Core.Validators
             RuleFor(b => b.Source).Must(n => 
                 !string.IsNullOrEmpty(n))
                 .WithMessage("Expense source is required");
+
+            RuleFor(b => b.Source)
+                .MaximumLength(50)
+                .WithMessage("Expense source must be less than 50 characters");
         }
     }
 }

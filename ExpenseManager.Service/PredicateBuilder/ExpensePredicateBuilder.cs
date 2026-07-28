@@ -1,5 +1,4 @@
 ﻿using ExpenseManager.Core.Entities;
-using LinqKit;
 using System;
 using System.Linq.Expressions;
 
@@ -9,40 +8,44 @@ namespace ExpenseManager.Service.PredicateBuilder
     {
         public static Expression<Func<Expense, bool>> Build(ExpenseFilter filter)
         {
-            var dateRangeStart = filter.DateRangeStart ?? DateTime.Now.AddYears(-1);
-            var dateRangeEnd = filter.DateRangeEnd ?? DateTime.Now;
+            var dateRangeStart = filter.DateRangeStart
+                ?? DateTime.Today.AddYears(-1);
 
-            Expression<Func<Expense, bool>> predicate = b => true;
+            var dateRangeEnd = filter.DateRangeEnd.HasValue
+                ? filter.DateRangeEnd.Value.Date.AddDays(1).AddTicks(-1)
+                : DateTime.Today.AddDays(1).AddTicks(-1);
+
+            Expression<Func<Expense, bool>> predicate = expense => true;
 
             if (!string.IsNullOrEmpty(filter.NameContains))
-                predicate = predicate.And(b => b.Name
-                    .ToLower().Contains(filter.NameContains
-                        .Trim().ToLower()));
+                predicate = predicate.AndAlso(e => e.Name != null
+                    && e.Name.ToLower().Contains(filter
+                    .NameContains.Trim().ToLower()));
 
             if (!string.IsNullOrEmpty(filter.SourceContains))
-                predicate = predicate.And(b => b.Source
-                    .ToLower().Contains(filter.SourceContains
-                        .Trim().ToLower()));
+                predicate = predicate.AndAlso(e => e.Source != null
+                    && e.Source.ToLower().Contains(filter
+                    .SourceContains.Trim().ToLower()));
 
             if (filter.ValueRangeStart.HasValue)
-                predicate = predicate.And(b => b.Value >= 
+                predicate = predicate.AndAlso(e => e.Value >=
                     filter.ValueRangeStart.Value);
 
             if (filter.ValueRangeEnd.HasValue)
-                predicate = predicate.And(b => b.Value <= 
+                predicate = predicate.AndAlso(e => e.Value <=
                     filter.ValueRangeEnd.Value);
 
-            predicate = predicate.And(b =>
-                b.ExpenseDate >= dateRangeStart &&
-                b.ExpenseDate <= dateRangeEnd);
+            predicate = predicate.AndAlso(e =>
+                e.ExpenseDate >= dateRangeStart &&
+                e.ExpenseDate <= dateRangeEnd);
 
             if (filter.Currency.HasValue)
-                predicate = predicate.And(b => b.Currency == 
-                    filter.Currency.Value);
+                predicate = predicate.AndAlso(e => 
+                    e.Currency == filter.Currency.Value);
 
             if (filter.Type.HasValue)
-                predicate = predicate.And(b => b.Type == 
-                    filter.Type.Value);
+                predicate = predicate.AndAlso(e => 
+                    e.Type == filter.Type.Value);
 
             if (filter.Month.HasValue)
             {
@@ -50,14 +53,27 @@ namespace ExpenseManager.Service.PredicateBuilder
                     DateTime.Now.Year, (int)filter.Month.Value, 1);
 
                 var filterDateEnd = filterDateStart
-                    .AddMonths(1).AddDays(-1);
+                    .AddMonths(1).AddTicks(-1);
 
-                predicate = predicate.And(
-                    b => b.ExpenseDate >= filterDateStart 
-                    && b.ExpenseDate <= filterDateEnd);
+                predicate = predicate.AndAlso(e => 
+                    e.ExpenseDate >= filterDateStart && 
+                    e.ExpenseDate <= filterDateEnd);
             }
 
             return predicate;
+        }
+
+        private static Expression<Func<T, bool>> AndAlso<T>(this Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
+        {
+            var parameter = left.Parameters[0];
+
+            var rightBody = new ReplaceParameterVisitor(
+                right.Parameters[0], parameter)
+                    .Visit(right.Body);
+
+            var body = Expression.AndAlso(left.Body, rightBody!);
+
+            return Expression.Lambda<Func<T, bool>>(body, parameter);
         }
     }
 }

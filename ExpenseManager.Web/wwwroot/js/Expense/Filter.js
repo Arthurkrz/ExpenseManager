@@ -38,42 +38,12 @@
 $(document).ready(function () {
     $("#filterSearchButton").on("click", function (e) {
         e.preventDefault();
+        searchExpenses(1);
+    });
 
-        let filterData = {
-            NameContains: $("#NameContains").val(),
-            SourceContains: $("#SourceContains").val(),
-            Currency: $("#Currency").val(),
-            Type: $("#Type").val(),
-            Month: $("#monthSelect").val(),
-            DateRangeStart: $("#DateRangeStart").val(),
-            DateRangeEnd: $("#DateRangeEnd").val(),
-            ValueStringRangeStart: $("#ValueStringRangeStart").val(),
-            ValueStringRangeEnd: $("#ValueStringRangeEnd").val()
-        };
-
-        $.ajax({
-            url: "/Expense/Filter",
-            type: "POST",
-            data: filterData,
-            success: function (html) {
-                $("#filteredResults").html(html);
-                $("#errorMessages").addClass("d-none").empty();
-            },
-
-            error: function (xhr) {
-                let errorContainer = $("#errorMessages");
-
-                if (xhr.responseJSON
-                    && xhr.responseJSON.errors
-                    && xhr.responseJSON.errors.length > 0) {
-                    errorContainer.html(xhr.responseJSON.errors.join("<br>"));
-                } else {
-                    errorContainer.html("An unexpected error occurred.");
-                }
-
-                errorContainer.removeClass("d-none").show();
-            }
-        });
+    $(document).on("click", ".filter-page-button", function () {
+        const pageNumber = $(this).data("page");
+        searchExpenses(pageNumber);
     });
 
     $("#clearFiltersButton").on("click", function () {
@@ -91,3 +61,43 @@ $(document).ready(function () {
         $("#errorMessages").addClass("d-none").empty();
     });
 });
+
+function searchExpenses(pageNumber) {
+    const filterData = {
+        NameContains: $("#NameContains").val(),
+        SourceContains: $("#SourceContains").val(),
+        Currency: $("#Currency").val(),
+        Type: $("#Type").val(),
+        Month: $("#monthSelect").val(),
+        DateRangeStart: $("#DateRangeStart").val(),
+        DateRangeEnd: $("#DateRangeEnd").val(),
+        ValueStringRangeStart: $("#ValueStringRangeStart").val(),
+        ValueStringRangeEnd: $("#ValueStringRangeEnd").val(),
+        PageNumber: pageNumber,
+        PageSize: 10
+    };
+
+    $.ajax({
+        url: "/Expense/Filter",
+        type: "POST",
+        data: filterData,
+        success: function (html) {
+            $("#filteredResults").html(html);
+            $("#errorMessages").addClass("d-none").empty();
+        },
+
+        error: function (xhr) {
+            let errorContainer = $("#errorMessages");
+
+            if (xhr.responseJSON
+                && xhr.responseJSON.errors
+                && xhr.responseJSON.errors.length > 0) {
+                errorContainer.html(xhr.responseJSON.errors.join("<br>"));
+            } else {
+                errorContainer.html("An unexpected error occurred.");
+            }
+
+            errorContainer.removeClass("d-none").show();
+        }
+    });
+}

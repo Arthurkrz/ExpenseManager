@@ -1,7 +1,6 @@
 ﻿using ExpenseManager.Core.Common;
 using ExpenseManager.Core.Contracts.Repositories;
 using ExpenseManager.Core.Entities;
-using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -36,8 +35,8 @@ namespace ExpenseManager.Infrastructure.Repositories
 
         public async Task<ExpenseSummaryResult> GetTotalsByCurrencyFilterAsync(Expression<Func<Expense, bool>> predicate)
         {
-            var totals = await _context.Set<Expense>().AsNoTracking()
-            .AsExpandable().Where(predicate)
+            var totals = await _context.Set<Expense>()
+            .AsNoTracking().Where(predicate)
             .GroupBy(e => e.Currency).Select(group => new
             {
                 Currency = group.Key.ToString(),

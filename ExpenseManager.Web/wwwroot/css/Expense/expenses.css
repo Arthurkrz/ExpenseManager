@@ -1,0 +1,33 @@
+﻿.expense-alert-success {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 500px;
+    z-index: 1050;
+}
+
+.success-alert-message {
+    text-align: center;
+}
+
+.success-progress {
+    height: 6px;
+}
+
+.success-progress-bar {
+    width: 0%;
+}
+
+.expenses-count-title {
+    font-size: 16px;
+}
+
+.total-amount {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.currency-total-selector {
+    margin-left: 15px;
+}

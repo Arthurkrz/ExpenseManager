@@ -59,7 +59,7 @@ namespace ExpenseManager.Web.Controllers
             return View(viewModel);
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> FilterAsync(ExpenseFilterViewModel filterViewModel)
         {
             if (IsFilterViewModelEmpty(filterViewModel))
@@ -72,7 +72,8 @@ namespace ExpenseManager.Web.Controllers
             var filterModel = _mapper.Map<ExpenseFilterViewModel, ExpenseFilter>(
                 filterViewModel, options => { options.MapViewModelToFilter(); });
 
-            var response = await _expenseService.GetExpensesWithFilterPagedAsync(filterModel);
+            var response = await _expenseService
+                .GetExpensesWithFilterPagedAsync(filterModel);
 
             if (!response.Success) 
                 return BadRequest(new 
@@ -81,7 +82,7 @@ namespace ExpenseManager.Web.Controllers
             var viewModel = _paginatedViewModelMapper
                 .ToExpensePaginatedViewModel(response.Data);
 
-            return PartialView("_ExpenseTable", viewModel);
+            return PartialView("_FilteredExpenseResults", viewModel);
         }
 
         [HttpPost]
@@ -149,6 +150,15 @@ namespace ExpenseManager.Web.Controllers
 
         [HttpGet]
         public IActionResult Create() => View();
+
+        [HttpGet]
+        public IActionResult Filter() => View(
+            new ExpenseFilterViewModel 
+            { 
+                ValueStringRangeStart = string.Empty, 
+                ValueStringRangeEnd = string.Empty, 
+                Expenses = [] 
+            });
 
         private bool IsFilterViewModelEmpty(ExpenseFilterViewModel filterViewModel) =>
             filterViewModel is null 

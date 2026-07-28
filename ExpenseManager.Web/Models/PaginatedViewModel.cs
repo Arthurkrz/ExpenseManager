@@ -21,8 +21,8 @@ namespace ExpenseManager.Web.Models
             }
         }
 
-        public bool HasPreviousPage { get; set; }
+        public bool HasPreviousPage => PageNumber > 1;
 
-        public bool HasNextPage { get; set; }
+        public bool HasNextPage => PageNumber < TotalPages;
     }
 }

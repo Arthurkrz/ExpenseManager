@@ -12,9 +12,14 @@
 
             <div class="modal-header">
                 <h5 class="modal-title" id="modalLabel-@Model.Id">
-                    Delete expense</h5>
-                <button type="button" class="btn-close"
-                    data-bs-dismiss="modal" aria-label="Close"></button>
+                    Delete expense
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
             </div>
 
             <div class="modal-body text-center">
@@ -22,13 +27,24 @@
                 <h6 class="text-danger pt-2">This action is irreversible!</h6>
             </div>
 
-            <div class="modal-footer d-flex justify-content-center gap-3">
-                <button type="button" class="btn btn-secondary 
-                    flex-fill" data-bs-dismiss="modal">No</button>
-                <form asp-controller="Expense" asp-action="Delete"
-                    asp-route-id="@Model.Id" method="post" class="flex-fill">
+            <div class="modal-footer delete-modal-footer">
+                <button type="button"
+                        class="btn btn-secondary delete-modal-button"
+                        data-bs-dismiss="modal">
+                    No
+                </button>
+
+                <form asp-controller="Expense"
+                      asp-action="Delete"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="delete-modal-form">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-danger w-100">Yes</button>
+
+                    <button type="submit"
+                            class="btn btn-danger delete-modal-button">
+                        Yes
+                    </button>
                 </form>
             </div>
 

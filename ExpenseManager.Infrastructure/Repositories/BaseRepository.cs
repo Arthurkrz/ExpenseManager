@@ -18,7 +18,7 @@ namespace ExpenseManager.Infrastructure.Repositories
         public async Task AddAsync(T entity)
         {
             _context.Set<T>().Add(entity);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();            
         }
 
         public async Task DeleteAsync(T entity)

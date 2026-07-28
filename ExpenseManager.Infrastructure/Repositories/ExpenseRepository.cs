@@ -1,13 +1,11 @@
 ﻿using ExpenseManager.Core.Common;
 using ExpenseManager.Core.Contracts.Repositories;
 using ExpenseManager.Core.Entities;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using System;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Collections.Generic;
-using LinqKit;
 
 namespace ExpenseManager.Infrastructure.Repositories
 {
@@ -45,10 +43,11 @@ namespace ExpenseManager.Infrastructure.Repositories
         public async Task<PaginatedResult<Expense>> GetExpensesWithFilterPagedAsync(Expression<Func<Expense, bool>> predicate, int pageNumber, int pageSize)
         {
             pageNumber = pageNumber <= 0 ? 1 : pageNumber;
-            pageSize = pageSize <= 0 ? 10 : pageSize;
+            pageSize = NormalizePageSize(pageSize);
 
-            var query = _context.Set<Expense>().AsNoTracking()
-                .Where(predicate).OrderByDescending(e => e.ExpenseDate);
+            var query = _context.Set<Expense>()
+                .AsNoTracking().Where(predicate)
+                .OrderByDescending(e => e.ExpenseDate);
 
             var totalCount = await query.CountAsync();
 

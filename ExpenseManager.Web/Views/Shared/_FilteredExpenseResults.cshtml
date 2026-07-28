@@ -1,0 +1,40 @@
+﻿@using ExpenseManager.Web.Models
+@model PaginatedViewModel<ExpenseViewModel>
+
+<partial name="_ExpenseTable" model="Model.Items" />
+
+@if (Model.TotalPages > 1)
+{
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                <button type="button" 
+                        class="page-link filter-page-button"
+                        data-page="@(Model.PageNumber - 1)"
+				        @(Model.HasPreviousPage ? "" : "disabled")>
+                    Previous
+                </button>
+            </li>
+
+            @for (var pageNum = 1; pageNum <= Model.TotalPages; pageNum++)
+            {
+                <li class="page-item @(pageNum == Model.PageNumber ? "active" : "")">
+                    <button type="button"
+                            class="page-link filter-page-button"
+                            data-page="@pageNum">
+						@pageNum
+                    </button>
+                </li>
+            }
+
+            <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                <button type="button"
+                        class="page-link filter-page-button"
+                        data-page="@(Model.PageNumber + 1)"
+                        @(Model.HasNextPage ? "" : "disabled")>
+                    Next
+                </button>
+            </li>
+        </ul>
+    </nav>
+}

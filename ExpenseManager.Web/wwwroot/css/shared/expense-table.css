@@ -1,0 +1,74 @@
+﻿.expense-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.expense-text-cell {
+    max-width: 180px;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.expense-action-column {
+    width: 70px;
+}
+
+.expense-action-edit {
+    margin-left: 10px;
+}
+
+.expense-action-delete {
+    margin-left: 5px;
+}
+
+.expense-edit-icon {
+    color: #ffc800;
+}
+
+.expense-delete-icon {
+    color: #ff0000;
+}
+
+.no-expense-found {
+    text-align: center;
+    font-weight: bold;
+    font-size: 24px;
+    margin-right: 55px;
+    padding-top: 50px;
+}
+
+.delete-modal-footer {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 16px;
+    justify-content: center;
+}
+
+.delete-modal-form {
+    flex: 1;
+    margin: 0;
+}
+
+.delete-modal-button {
+    width: 100%;
+}
+
+.delete-modal-footer > .delete-modal-button {
+    flex: 1;
+}
+
+.edit-modal-body {
+    padding-top: 1px;
+}
+
+.edit-modal-textarea {
+    height: 50px;
+    resize: vertical;
+}
+
+.edit-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}

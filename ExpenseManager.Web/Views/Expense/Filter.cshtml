@@ -2,79 +2,92 @@
 @using ExpenseManager.Web.Models.Enum
 @model ExpenseFilterViewModel
 
-@{ ViewData["Title"] = "Search"; }
-
+@{ 
+    ViewData["Title"] = "Search"; 
+}
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/Expense/Filter.css" />
+    <link rel="stylesheet" href="~/css/expense/filter.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/expense-table.css" asp-append-version="true" />
  }
 
-<h1 style="font-size: 26px;">Expense filters</h1>
-<div class="d-flex justify-content-between mb-3" style="padding-top: 10px">
-    <div style="max-width: 400px; min-height: 500px; padding: 15px" class="card shadow-lg border-0">
-        <div class="alert alert-warning d-flex align-items-start" style="background-color: lightyellow;">
+<h1 class="filter-title">Expense filters</h1>
+
+<div class="filter-layout filter-page-container">
+    <div class="card shadow-lg border-0 filter-card">
+        <div class="alert alert-warning d-flex align-items-start filter-info-alert">
             <i class="fa-solid fa-circle-info mt-1 me-2"></i>
-            <span class="text-wrap" style="max-width: 100%">
+            <span class="text-wrap filter-info-text">
                 The search can be performed using any of the parameters!
             </span>
         </div>
 
-        <hr class="mt-1 mb-2" style="color: dimgrey; opacity: 0,8;" />
+        <hr class="mt-1 mb-2 filter-separator" />
+
         <div id="errorMessages" class="alert alert-danger d-none"></div>
 
         <div class="row mt-1">
-            <div class="col-6">
+            <div class="col-12">
                 <label asp-for="NameContains" class="form-label">Name</label>
-                <textarea asp-for="NameContains" class="form-control mt-0"
-                    style="height: 17px; min-width: 370px;"
-                    placeholder="Name" id="NameContains" name="NameContains"></textarea>
+                <textarea asp-for="NameContains" 
+                        class="form-control mt-0 filter-textarea"
+                        placeholder="Name" 
+                        id="NameContains" 
+                        name="NameContains"></textarea>
                 <span asp-validation-for="NameContains" class="text-danger"></span>
             </div>
         </div>
 
         <div class="row mt-1">
-            <div class="col-6">
-                <label asp-for="SourceContains" style="padding-top: 5px;" class="form-label">Expense Source</label>
-                <textarea asp-for="SourceContains" class="form-control mt-0"
-                    style="height: 17px; min-width: 370px;"
-                    placeholder="Source" id="SourceContains" name="SourceContains"></textarea>
+            <div class="col-12">
+                <label asp-for="SourceContains" class="form-label filter-label-spacing">Expense Source</label>
+                <textarea asp-for="SourceContains" 
+                        class="form-control mt-0 filter-textarea"
+                        placeholder="Source" 
+                        id="SourceContains" 
+                        name="SourceContains"></textarea>
                 <span asp-validation-for="SourceContains" class="text-danger"></span>
             </div>
         </div>
 
         <div class="row mt-1">
-            <div class="col-6">
-                <label asp-for="Currency" style="padding-top: 5px;" class="form-label">Currency</label>
+            <div class="col-12">
+                <label asp-for="Currency" class="form-label filter-label-spacing">Currency</label>
                 <select asp-for="Currency"
-                    asp-items="@Html.GetEnumSelectList<CurrencyVM>()"
-                    class="form-control mt-0" style="min-width: 370px;">
-                        <option value="" selected>Select</option>
+                        asp-items="@Html.GetEnumSelectList<CurrencyVM>()"
+                        class="form-control mt-0 filter-input-wide">
+                    <option value="" selected>Select</option>
                 </select>
                 <span asp-validation-for="Currency" class="text-danger"></span>
             </div>
         </div>
 
         <div class="row mt-1">
-            <div class="col-6">
-                <label asp-for="Type" style="padding-top: 5px;" class="form-label">Category</label>
+            <div class="col-12">
+                <label asp-for="Type" class="form-label filter-label-spacing">Category</label>
                 <select asp-for="Type"
-                    asp-items="@Html.GetEnumSelectList<ExpenseTypeVM>()"
-                    class="form-control mt-0" style="min-width: 370px;">
-                        <option value="" selected>Select</option>
+                        asp-items="@Html.GetEnumSelectList<ExpenseTypeVM>()"
+                        class="form-control mt-0 filter-input-wide">
+                    <option value="" selected>Select</option>
                 </select>
                 <span asp-validation-for="Type" class="text-danger"></span>
             </div>
         </div>
 
-        <hr class="mt-3 mb-2" style="color: dimgrey; opacity: 0,8;" />
+        <hr class="mt-3 mb-2 filter-separator" />
 
-        <div class="container-fluid" style="padding-top: 5px;">
-            <div class="row" style="padding-top: 5px;">
+        <div class="container-fluid filter-section">
+            <div class="row filter-option-row">
                 <div class="position-relative d-inline-block">
-                    <label class="fw-bold cursor-pointer" id="dateLabel">Expense Date <i class="fa-solid fa-angle-right fa-sm"></i></label>
+                    <label class="fw-bold cursor-pointer" id="dateLabel">
+                        Expense Date <i class="fa-solid fa-angle-right fa-sm"></i>
+                    </label>
                 </div>
-                <div class="position-relative d-inline-block" style="padding-top: 15px;">
-                    <label class="fw-bold cursor-pointer" id="valueLabel">Expense Value <i class="fa-solid fa-angle-right fa-sm"></i></label>
+
+                <div class="position-relative d-inline-block filter-option-spacing">
+                    <label class="fw-bold cursor-pointer" id="valueLabel">
+                        Expense Value <i class="fa-solid fa-angle-right fa-sm"></i>
+                    </label>
                 </div>
             </div>
         </div>
@@ -82,6 +95,7 @@
         <div id="dateSidebar" class="sidebar-box border border-dark p-3 bg-white shadow d-none">
             <label asp-for="DateRangeStart" class="fw-bold">Start of range</label>
             <input asp-for="DateRangeStart" type="date" class="form-control mt-1" />
+
             <label asp-for="DateRangeEnd" class="fw-bold mt-2">End of range</label>
             <input asp-for="DateRangeEnd" type="date" class="form-control mt-1" />
         </div>
@@ -89,33 +103,36 @@
         <div id="valueSidebar" class="sidebar-box border border-dark p-3 bg-white shadow d-none">
             <label asp-for="ValueStringRangeStart" class="fw-bold">Start of range</label>
             <input asp-for="ValueStringRangeStart" type="number" class="form-control mt-1" step="0.01" />
+
             <label asp-for="ValueStringRangeEnd" class="fw-bold mt-2">End of range</label>
             <input asp-for="ValueStringRangeEnd" type="number" class="form-control mt-1" step="0.01" />
         </div>
 
-        <hr class="mt-3 mb-2" style="color: dimgrey; opacity: 0,8;" />
+        <hr class="mt-3 mb-2 filter-separator" />
 
         <div class="modal-footer d-flex justify-content-between gap-1">
-            <button type="button" id="clearFiltersButton" class="btn btn-secondary">Clear filters</button>
+            <button type="button" class="btn btn-secondary" id="clearFiltersButton">
+                Clear filters
+            </button>
+
             <button type="submit" class="btn btn-success fw-bold" id="filterSearchButton">
                 Search
             </button>
         </div>
     </div>
 
-    <div id="filteredResults">
-        <partial name="_ExpenseTable" model="Model.Expenses" />
-    </div>
+    <div class="filter-results-container" id="filteredResults"></div>
 
-    <div>
+    <div class="filter-month-container">
         <label for="monthSelect" class="me-2 mb-0">Only from month:</label>
-        <select id="monthSelect" class="form-select w-auto"
-            asp-items="@Html.GetEnumSelectList<PurchaseMonthVM>()">
+        <select id="monthSelect"
+                class="form-select w-auto"
+                asp-items="@Html.GetEnumSelectList<PurchaseMonthVM>()">
             <option value="" selected>Select</option>
         </select>
     </div>
 </div>
 
 @section Scripts {
-    <script src="~/js/Expense/Filter.js"></script>
+    <script src="~/js/expense/filter.js" asp-append-version="true"></script>
 }

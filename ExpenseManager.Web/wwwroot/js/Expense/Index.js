@@ -1,4 +1,4 @@
-﻿$(document).ready(function () {
+﻿document.addEventListener("DOMContentLoaded", function () {
     if (typeof jQuery === "undefined") {
         console.error("jQuery is not loaded!");
         return;
@@ -17,10 +17,12 @@
     function updateTotalDisplay(currency) {
         if (!totalAmountElement) return;
 
-        const total = window.expenseTotals?.[currency] ?? 0;
+        const pageTotal = window.expensePageTotals?.[currency] ?? 0;
+        const allTotal = window.expenseAllTotals?.[currency] ?? 0;
 
         totalAmountElement.innerHTML =
-            `Total value - ${formatCurrency(total, currency)}`;
+            `Total value - ${formatCurrency(pageTotal, currency)} | ` +
+            `All expenses total - ${formatCurrency(allTotal, currency)}`;
     }
 
     if (currencySelect) {
@@ -34,7 +36,7 @@
 
     $('#createExpenseModal').on('hidden.bs.modal', function () {
         setTimeout(function () {
-            $("#addExpenseButton").focus();
+            document.getElementById("addExpenseButton")?.focus();
         }, 100);
     });
 
@@ -42,6 +44,38 @@
     registerCreateHandler();
     registerEditHandler();
 });
+
+function enableSuccessAlertProgress() {
+    const displayTime = 3000;
+    const progressBar = document.getElementById("successProgressBar");
+    const alertBox = document.getElementById("successAlert");
+
+    if (!progressBar || !alertBox) {
+        return;
+    }
+
+    const startTime = Date.now();
+
+    const timer = setInterval(function () {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / displayTime, 1) * 100;
+
+        progressBar.style.width = progress + "%";
+
+        if (progress >= 100) {
+            clearInterval(timer);
+
+            setTimeout(function () {
+                alertBox.style.transition = "opacity 0.5s";
+                alertBox.style.opacity = "0";
+
+                setTimeout(function () {
+                    alertBox.style.display = "none";
+                }, 500);
+            }, 500);
+        }
+    }, 50);
+}
 
 function enableValidation() {
     var form = $("#createExpenseForm");
