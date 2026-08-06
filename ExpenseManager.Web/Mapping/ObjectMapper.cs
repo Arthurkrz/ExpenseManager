@@ -1,8 +1,10 @@
 ﻿using ExpenseManager.Web.Mapping.Configurations;
 using ExpenseManager.Web.Mapping.Contracts;
+using ExpenseManager.Web.Mapping.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace ExpenseManager.Web.Mapping
 {
@@ -23,8 +25,11 @@ namespace ExpenseManager.Web.Mapping
 
             var options = BuildOptions(optionsAction);
 
-            return source.Select(item => MapObject(
-                item, options)).ToList();
+            return source.Select(item =>
+            {
+                ArgumentNullException.ThrowIfNull(item);
+                return MapObject(item, options);
+            }).ToList();
         }
 
         private static MappingOptions<TSource, TTarget> BuildOptions<TSource, TTarget>(Action<MappingOptions<TSource, TTarget>> optionsAction)
@@ -37,12 +42,27 @@ namespace ExpenseManager.Web.Mapping
 
         private TTarget MapObject<TSource, TTarget>(TSource source, MappingOptions<TSource, TTarget> options) where TTarget : new()
         {
-            var target = new TTarget();
+            var context = new MappingContext();
 
-            ApplyConfiguredMappings(source, target, options);
-            ApplyConventionMappings(source, target, options);
+            context.Enter(source!, typeof(TTarget));
 
-            return target;
+            try
+            {
+                var target = new TTarget();
+
+                ApplyConfiguredMappings(source, target, options);
+
+                var alreadyMappedProperties = options.PropertyMappings
+                    .Select(m => m.TargetProperty.Name)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                ApplyConventionMappings(source, target, 
+                    alreadyMappedProperties, context);
+
+                return target;
+            }
+
+            finally { context.Exit(source!); }
         }
 
         private void ApplyConfiguredMappings<TSource, TTarget>(TSource source, TTarget target, MappingOptions<TSource, TTarget> options)
@@ -56,130 +76,141 @@ namespace ExpenseManager.Web.Mapping
             }
         }
 
-        private void ApplyConventionMappings<TSource, TTarget>(TSource source, TTarget target, MappingOptions<TSource, TTarget> options)
+        private static void ApplyConventionMappings(object source, object target, HashSet<string> ignoredTargetProperties, MappingContext context)
         {
-            var sourceProps = typeof(TSource).GetProperties()
-                .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
+            var sourceProperties = GetReadableProperties(source.GetType());
+            var targetProperties = GetWritableProperties(target.GetType());
 
-            var targetProps = typeof(TTarget).GetProperties()
-                .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
-
-            var alreadyMappedTargetProperties = options.PropertyMappings
-                .Select(m => m.TargetProperty.Name)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var sourceProp in sourceProps.Values)
+            foreach (var sourceProperty in sourceProperties.Values)
             {
-                if (!targetProps.TryGetValue(sourceProp.Name, out var targetProp)) continue;
-                if (alreadyMappedTargetProperties.Contains(targetProp.Name)) continue;
-                if (targetProp.SetMethod == null || !targetProp.SetMethod.IsPublic) continue;
+                if (!targetProperties.TryGetValue(sourceProperty.Name, 
+                        out var targetProperty))
+                            continue;
 
-                var sourceValue = sourceProp.GetValue(source);
-
-                if (IsAssignableDirectly(sourceProp.PropertyType, targetProp.PropertyType))
-                {
-                    targetProp.SetValue(target, sourceValue);
+                if (ignoredTargetProperties.Contains(targetProperty.Name))
                     continue;
-                }
 
-                if (IsEnumMappingPossible(sourceProp.PropertyType, targetProp.PropertyType))
-                {
-                    var mappedEnum = MapEnumValue(sourceValue,
-                        sourceProp.PropertyType, targetProp.PropertyType);
-
-                    targetProp.SetValue(target, mappedEnum);
-                    continue;
-                }
-
-                if (IsNestedClassMappingPossible(sourceProp.PropertyType, targetProp.PropertyType))
-                {
-                    var mappedClass = MapNestedClass(sourceValue, targetProp.PropertyType);
-
-                    targetProp.SetValue(target, mappedClass);
-                    continue;
-                }
+                MapProperty(source, target, sourceProperty, 
+                    targetProperty, context);
             }
         }
 
-        private static object MapNestedClass(object sourceValue, Type targetType)
+        private static void ApplyNestedConventionMappings(object source, object target, MappingContext context)
+        {
+            var sourceProperties = GetReadableProperties(source.GetType());
+            var targetProperties = GetWritableProperties(target.GetType());
+
+            foreach (var sourceProperty in sourceProperties.Values)
+            {
+                if (!targetProperties.TryGetValue(sourceProperty.Name, 
+                    out var targetProperty))
+                        continue;
+
+                MapProperty(source, target, sourceProperty, 
+                    targetProperty, context);
+            }
+        }
+
+        private static void MapProperty(object source, object target, PropertyInfo sourceProperty, PropertyInfo targetProperty, MappingContext context)
+        {
+            var sourceValue = sourceProperty.GetValue(source);
+
+            if (MappingTypeHelper.IsAssignableDirectly(
+                    sourceProperty.PropertyType,
+                    targetProperty.PropertyType))
+            {
+                targetProperty.SetValue(target, sourceValue);
+                return;
+            }
+
+            if (MappingTypeHelper.IsEnumMappingPossible(
+                    sourceProperty.PropertyType,
+                    targetProperty.PropertyType))
+            {
+                var mappedEnum = MapEnumValue(sourceValue, 
+                    sourceProperty.PropertyType, 
+                    targetProperty.PropertyType);
+
+                targetProperty.SetValue(target, mappedEnum);
+                return;
+            }
+
+            if (MappingTypeHelper.IsNestedClassMappingPossible(
+                    sourceProperty.PropertyType,
+                    targetProperty.PropertyType))
+            {
+                var mappedObject = MapNestedObject(sourceValue, 
+                    targetProperty.PropertyType, context);
+
+                targetProperty.SetValue(target, mappedObject);
+            }
+        }
+
+        private static object MapNestedObject(object sourceValue, Type targetType, MappingContext context)
         {
             if (sourceValue is null) return null;
 
-            var sourceType = sourceValue.GetType();
-            object target = Activator.CreateInstance(targetType);
+            context.Enter(sourceValue, targetType);
 
-            var sourceProps = sourceType.GetProperties()
-                .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
-
-            var targetProps = targetType.GetProperties()
-                .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
-
-            foreach (var sourceProp in sourceProps.Values)
+            try
             {
-                if (!targetProps.TryGetValue(sourceProp.Name, out var targetProp)) continue;
-                if (targetProp.SetMethod == null || !targetProp.SetMethod.IsPublic) continue;
+                var target = MappingTypeHelper.CreateTargetInstance(targetType);
+                ApplyNestedConventionMappings(sourceValue, target, context);
 
-                var sourcePropValue = sourceProp.GetValue(sourceValue);
-
-                if (IsAssignableDirectly(sourceProp.PropertyType, targetProp.PropertyType))
-                {
-                    targetProp.SetValue(target, sourcePropValue);
-                    continue;
-                }
-
-                if (IsEnumMappingPossible(sourceProp.PropertyType, targetProp.PropertyType))
-                {
-                    var mappedEnum = MapEnumValue(sourcePropValue,
-                        sourceProp.PropertyType, targetProp.PropertyType);
-
-                    targetProp.SetValue(target, mappedEnum);
-                    continue;
-                }
-
-                if (IsNestedClassMappingPossible(sourceProp.PropertyType, targetProp.PropertyType))
-                {
-                    var mappedClass = MapNestedClass(sourcePropValue, targetProp.PropertyType);
-
-                    targetProp.SetValue(target, mappedClass);
-                    continue;
-                }
+                return target;
             }
 
-            return target;
+            finally { context.Exit(sourceValue); }
         }
 
         private static object MapEnumValue(object sourceValue, Type sourceType, Type targetType)
         {
-            if (sourceValue is null) return null;
+            var sourceEnumType = MappingTypeHelper.UnwrapNullable(sourceType);
+            var targetEnumType = MappingTypeHelper.UnwrapNullable(targetType);
 
-            var sourceEnumType = Nullable.GetUnderlyingType(sourceType) ?? sourceType;
-            var targetEnumType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+            if (sourceValue is null)
+            {
+                var targetIsNullable = Nullable.GetUnderlyingType(targetType) is not null;
 
-            var enumName = Enum.GetName(sourceEnumType, sourceValue);
+                if (!targetIsNullable)
+                    throw new InvalidOperationException(
+                        $"Cannot map a null value from enum " +
+                        $"'{sourceEnumType.Name}' to non-nullable enum " +
+                        $"'{targetEnumType.Name}'.");
 
-            if (enumName is null) return null;
+                return null;
+            }
 
-            return Enum.Parse(targetEnumType, enumName);
+            var enumName = Enum.GetName(sourceEnumType, sourceValue) ??
+                throw new InvalidOperationException($"The value " +
+                    $"'{sourceValue}' is not defined in enum " +
+                    $"'{sourceEnumType.Name}'.");
+
+            if (!Enum.TryParse(targetEnumType, enumName,
+                ignoreCase: false, out var mappedValue))
+                    throw new InvalidOperationException(
+                        $"Cannot map enum value " +
+                        $"'{sourceEnumType.Name}.{enumName}' to enum " +
+                        $"'{targetEnumType.Name}' because the target enum " +
+                        $"does not contain a member named '{enumName}'.");
+
+            return mappedValue;
         }
 
-        private static bool IsEnumMappingPossible(Type sourceType, Type targetType)
-        {
-            var sourceEnumType = Nullable.GetUnderlyingType(sourceType) ?? sourceType;
-            var targetEnumType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+        private static Dictionary<string, PropertyInfo> GetReadableProperties(Type type) =>
+            type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(property => property.CanRead &&
+                    property.GetMethod?.IsPublic == true &&
+                    property.GetIndexParameters().Length == 0)
+                .ToDictionary(property => property.Name, property => property,
+                    StringComparer.OrdinalIgnoreCase);
 
-            return sourceEnumType.IsEnum && targetEnumType.IsEnum;
-        }
-
-        private static bool IsAssignableDirectly(Type sourceType, Type targetType) =>
-            targetType.IsAssignableFrom(sourceType) && 
-                !targetType.IsEnum &&
-                !sourceType.IsEnum && 
-                !IsComplexClass(sourceType);
-
-        private static bool IsNestedClassMappingPossible(Type sourceType, Type targetType) =>
-            IsComplexClass(sourceType) && IsComplexClass(targetType);
-
-        private static bool IsComplexClass(Type type) =>
-            type.IsClass && type != typeof(string);
+        private static Dictionary<string, PropertyInfo> GetWritableProperties(Type type) =>
+            type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(property => property.CanWrite &&
+                    property.SetMethod?.IsPublic == true &&
+                    property.GetIndexParameters().Length == 0)
+                .ToDictionary(property => property.Name, property => property, 
+                    StringComparer.OrdinalIgnoreCase);
     }
 }

@@ -25,6 +25,10 @@ namespace ExpenseManager.Core.Validators
                 .WithMessage("Value is required");
 
             RuleFor(b => b.Value)
+                .GreaterThan(-1)
+                .WithMessage("Value must not be negative");
+
+            RuleFor(b => b.Value)
                 .LessThan(1000000)
                 .WithMessage("Value must be lower than a million");
 
@@ -38,6 +42,7 @@ namespace ExpenseManager.Core.Validators
 
             RuleFor(b => b.ExpenseDate)
                 .GreaterThan(DateTime.Now.AddYears(-1))
+                .When(b => b.ExpenseDate != default)
                 .WithMessage("Expenses must be from less than 1 year ago");
 
             RuleFor(b => b.Source).Must(n => 

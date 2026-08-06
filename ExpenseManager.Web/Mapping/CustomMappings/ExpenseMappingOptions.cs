@@ -31,7 +31,7 @@ namespace ExpenseManager.Web.Mapping.CustomMappings
             (
                 source => source.ExpenseDate,
                 target => target.ExpenseDate,
-                value => value!.Value
+                value => value.Value
             );
     }
 }

@@ -5,34 +5,52 @@ using System.Reflection;
 
 namespace ExpenseManager.Web.Mapping.Configurations
 {
-    public class MappingOptions<TSource, TTarget>
+    public sealed class MappingOptions<TSource, TTarget>
     {
-        private readonly List<PropertyMapping<TSource, TTarget>> _propertyMappings = [];
+        public List<PropertyMapping<TSource, TTarget>> PropertyMappings { get; } = [];
 
-        public IReadOnlyList<PropertyMapping<TSource, TTarget>> PropertyMappings => _propertyMappings;
-
-        public MappingOptions<TSource, TTarget> MapProperty<TSourceProperty, TTargetProperty>(Expression<Func<TSource, TSourceProperty>> sourceProperty, Expression<Func<TTarget, TTargetProperty>> targetProperty, Func<TSourceProperty, TTargetProperty> converter)
+        public MappingOptions<TSource, TTarget> MapProperty<TSourceProperty, TTargetProperty>(Expression<Func<TSource, TSourceProperty>> sourceExpression, Expression<Func<TTarget, TTargetProperty>> targetExpression, Func<TSourceProperty, TTargetProperty> converter)
         {
-            var sourcePropertyInfo = GetPropertyInfo(sourceProperty);
-            var targetPropertyInfo = GetPropertyInfo(targetProperty);
+            ArgumentNullException.ThrowIfNull(sourceExpression);
+            ArgumentNullException.ThrowIfNull(targetExpression);
+            ArgumentNullException.ThrowIfNull(converter);
 
-            _propertyMappings.Add(new PropertyMapping<TSource, TTarget>
-            { 
-                SourceProperty = sourcePropertyInfo,
-                TargetProperty = targetPropertyInfo,
-                Converter = value => converter((TSourceProperty)value)
+            var sourceProperty = GetPropertyInfo(sourceExpression);
+            var targetProperty = GetPropertyInfo(targetExpression);
+
+            if (targetProperty.SetMethod?.IsPublic != true)
+                throw new InvalidOperationException(
+                    $"Target property '{targetProperty.Name}' " +
+                    $"must have a public setter.");
+
+            PropertyMappings.Add(new PropertyMapping<TSource, TTarget>
+            {
+                SourceProperty = sourceProperty,
+                TargetProperty = targetProperty,
+                Converter = value =>
+                {
+                    if (value is null) return converter(default!);
+                    return converter((TSourceProperty)value);
+                }
             });
 
             return this;
         }
 
-        private static PropertyInfo GetPropertyInfo<TObject, TProperty>(Expression<Func<TObject, TProperty>> expression)
+        private static PropertyInfo GetPropertyInfo<TObject, TProperty>(
+            Expression<Func<TObject, TProperty>> expression)
         {
-            if (expression.Body is MemberExpression memberExpression &&
-                memberExpression.Member is PropertyInfo propertyInfo)
-                    return propertyInfo;
+            if (expression.Body is MemberExpression
+                { Member: PropertyInfo property })
+                    return property;
 
-            throw new ArgumentException("Expression must point to a property.");
+            if (expression.Body is UnaryExpression
+                { Operand: MemberExpression 
+                    { Member: PropertyInfo convertedProperty } })
+                        return convertedProperty;
+
+            throw new ArgumentException(
+                "Expression must point to a property.");
         }
     }
 }

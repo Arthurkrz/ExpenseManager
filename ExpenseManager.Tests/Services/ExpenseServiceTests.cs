@@ -6,29 +6,26 @@ using ExpenseManager.Core.Validators;
 using ExpenseManager.Service;
 using ExpenseManager.Service.PredicateBuilder;
 using ExpenseManager.Tests.ObjectGenerators;
-using FluentValidation;
+using FluentAssertions;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace ExpenseManager.Tests
+namespace ExpenseManager.Tests.Services
 {
-    public class ExpenseServiceTest
+    public class ExpenseServiceTests
     {
         private readonly ExpenseService _sut;
-        private readonly Faker _faker;
-        private IValidator<Expense> _validator;
-        private IValidator<ExpenseFilter> _validatorFilter;
-        private readonly Mock<IExpenseRepository> _mockRepository;
+        private readonly Faker _faker = new();
+        private readonly ExpenseValidator _validator = new();
+        private readonly ExpenseFilterValidator _validatorFilter = new();
+        private readonly Mock<IExpenseRepository> _mockRepository = new();
 
-        public ExpenseServiceTest()
+        public ExpenseServiceTests()
         {
-            _validator = new ExpenseValidator();
-            _validatorFilter = new ExpenseFilterValidator();
-            _faker = new Faker();
-            _mockRepository = new Mock<IExpenseRepository>();
             _sut = new ExpenseService(_mockRepository.Object, _validator, _validatorFilter);
         }
 
@@ -53,13 +50,15 @@ namespace ExpenseManager.Tests
 
         [Theory]
         [MemberData(nameof(ExpenseData.GetInvalidExpenses), MemberType = typeof(ExpenseData))]
-        public async Task CreateExpense_MustReturnError_WhenInvalidProperty(Expense bill, string errorMessage)
+        public async Task CreateExpense_MustReturnError_WhenInvalidProperty(Expense expense, List<string> errorMessages)
         {
-            // Act & Assert
-            var result = await _sut.CreateExpenseAsync(bill);
+            // Act
+            var result = await _sut.CreateExpenseAsync(expense);
 
+            // Assert
             Assert.False(result.Success);
-            Assert.Contains(errorMessage, result.Errors);
+
+            errorMessages.Should().BeEquivalentTo(result.Errors);
         }
 
         [Fact]
@@ -106,14 +105,15 @@ namespace ExpenseManager.Tests
 
         [Theory]
         [MemberData(nameof(ExpenseFilterData.GetInvalidFilters), MemberType = typeof(ExpenseFilterData))]
-        public async Task GetExpensesWithFilter_MustReturnError_WhenInvalidFilter(ExpenseFilter expenseFilter, string errorMessage)
+        public async Task GetExpensesWithFilter_MustReturnError_WhenInvalidFilter(ExpenseFilter expenseFilter, List<string> errorMessages)
         {
             // Act
             var result = await _sut.GetExpensesWithFilterPagedAsync(expenseFilter);
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains(errorMessage, result.Errors);
+
+            errorMessages.Should().BeEquivalentTo(result.Errors);
         }
 
         [Fact]
@@ -123,12 +123,12 @@ namespace ExpenseManager.Tests
             var expense = new Expense
             {
                 Id = new Guid(),
-                Name = "Almoço",
+                Name = "Name",
                 Currency = Currency.EUR,
                 Value = 1000,
                 Type = ExpenseType.Food,
                 ExpenseDate = DateTime.Now,
-                Source = "Batel Grill"
+                Source = "Source"
             };
 
             _mockRepository.Setup(x => x.GetByIdAsync(expense.Id)).ReturnsAsync(expense);
@@ -140,7 +140,7 @@ namespace ExpenseManager.Tests
 
         [Theory]
         [MemberData(nameof(ExpenseData.GetInvalidExpenses), MemberType = typeof(ExpenseData))]
-        public async Task UpdateExpense_MustReturnError_WhenInvalidProperty(Expense expense, string errorMessage)
+        public async Task UpdateExpense_MustReturnError_WhenInvalidProperty(Expense expense, List<string> errorMessages)
         {
             // Arrange
             _mockRepository.Setup(x => x.GetByIdAsync(expense.Id)).ReturnsAsync(expense);
@@ -150,7 +150,8 @@ namespace ExpenseManager.Tests
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains(errorMessage, result.Errors);
+
+            errorMessages.Should().BeEquivalentTo(result.Errors);
         }
 
         [Fact]
@@ -160,12 +161,12 @@ namespace ExpenseManager.Tests
             var expense = new Expense
             {
                 Id = new Guid(),
-                Name = "Lunch",
+                Name = "Name",
                 Currency = Currency.EUR,
                 Value = 1000,
                 Type = ExpenseType.Food,
                 ExpenseDate = DateTime.Now,
-                Source = "Batel Grill"
+                Source = "Source"
             };
 
             // Act
@@ -173,7 +174,7 @@ namespace ExpenseManager.Tests
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("Expense not found", result.Errors);
+            Assert.Contains("Expense not found.", result.Errors);
         }
 
         [Fact]
@@ -198,14 +199,18 @@ namespace ExpenseManager.Tests
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("ID does not match any expense", result.Errors);
+            Assert.Contains("ID does not match any expense.", result.Errors);
         }
 
         [Fact]
-        public async Task List_MustCallRepository()
+        public async Task List_MustCallListRepositoryMethod()
         {
-            // Act & Assert
-            Assert.NotNull(await _sut.GetPagedAsync(1, 1));
+            // Act 
+            await _sut.GetPagedAsync(1, 1);
+
+            // Assert
+            _mockRepository.Verify(x => x.GetExpensesPagedAsync(
+                It.IsAny<int>(), It.IsAny<int>()), Times.Once);
         }
     }
 }

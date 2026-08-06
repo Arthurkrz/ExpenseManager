@@ -1,4 +1,5 @@
-﻿using ExpenseManager.Web.Models.Enum;
+﻿using ExpenseManager.Web.Mapping.CustomMappings;
+using ExpenseManager.Web.Models.Enum;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -21,20 +22,7 @@ namespace ExpenseManager.Web.Models
 
         [DisplayName("Value")]
         [DisplayFormat(DataFormatString = "{0:F2}", ApplyFormatInEditMode = true)]
-        public decimal Value
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(ValueString)) return 0m;
-
-                string valueString = ValueString.Replace(',', '.');
-                decimal.TryParse(valueString,
-                    NumberStyles.Currency, 
-                    CultureInfo.InvariantCulture, out var value);
-
-                return value;
-            }
-        }
+        public decimal Value => MappingConverters.StringToMoney(ValueString);
 
         [Required(ErrorMessage = "Value is required.")]
         public string ValueString { get; set; }

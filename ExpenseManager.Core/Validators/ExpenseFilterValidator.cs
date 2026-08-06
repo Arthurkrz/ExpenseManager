@@ -7,8 +7,17 @@ namespace ExpenseManager.Core.Validators
     {
         public ExpenseFilterValidator()
         {
+            RuleFor(b => b.NameContains)
+                .MaximumLength(50)
+                .WithMessage("Expense name must be less than 50 characters");
+
+            RuleFor(b => b.SourceContains)
+                .MaximumLength(50)
+                .WithMessage("Expense source must be less than 50 characters");
+
             RuleFor(f => f.ValueRangeStart)
                 .LessThan(f => f.ValueRangeEnd)
+                .When(vrs => vrs.ValueRangeStart > 0)
                 .WithMessage("Start of range for value must be lower than end of range");
 
             RuleFor(f => f.ValueRangeStart)

@@ -40,6 +40,7 @@
         }, 100);
     });
 
+    enableSuccessAlertProgress();
     enableValidation();
     registerCreateHandler();
     registerEditHandler();
