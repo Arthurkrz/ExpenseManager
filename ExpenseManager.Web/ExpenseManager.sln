@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpenseManager.Tests", "..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseManager.ExternalServices", "..\ExpenseManager.ExternalServices\ExpenseManager.ExternalServices.csproj", "{C6D5AAA2-80D4-4AA5-BC68-14D08E38828D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseManager.Tests.Integration", "..\ExpenseManager.Tests.Integration\ExpenseManager.Tests.Integration.csproj", "{E57DD81B-5BC8-4DE0-847C-B42D7B9DEAFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{C6D5AAA2-80D4-4AA5-BC68-14D08E38828D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6D5AAA2-80D4-4AA5-BC68-14D08E38828D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6D5AAA2-80D4-4AA5-BC68-14D08E38828D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E57DD81B-5BC8-4DE0-847C-B42D7B9DEAFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E57DD81B-5BC8-4DE0-847C-B42D7B9DEAFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E57DD81B-5BC8-4DE0-847C-B42D7B9DEAFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E57DD81B-5BC8-4DE0-847C-B42D7B9DEAFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
