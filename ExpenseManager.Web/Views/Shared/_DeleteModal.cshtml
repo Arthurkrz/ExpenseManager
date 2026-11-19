@@ -23,8 +23,18 @@
             </div>
 
             <div class="modal-body text-center">
-                <h5>Are you sure that you wish to delete this expense?</h5>
-                <h6 class="text-danger pt-2">This action is irreversible!</h6>
+
+                <div id="deleteErrorMessages-@Model.Id"
+                     class="alert alert-danger d-none">
+                </div>
+
+                <h5>
+                    Are you sure that you wish to delete this expense?
+                </h5>
+
+                <h6 class="text-danger pt-2">
+                    This action is irreversible!
+                </h6>
             </div>
 
             <div class="modal-footer delete-modal-footer">
@@ -38,7 +48,8 @@
                       asp-action="Delete"
                       asp-route-id="@Model.Id"
                       method="post"
-                      class="delete-modal-form">
+                      class="delete-modal-form"
+                      data-expense-id="@Model.Id">
                     @Html.AntiForgeryToken()
 
                     <button type="submit"

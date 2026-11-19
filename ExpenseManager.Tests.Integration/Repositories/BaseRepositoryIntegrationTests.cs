@@ -7,7 +7,7 @@ using ExpenseManager.Tests.Integration.Utilities;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ExpenseManager.Tests.Integration.Repository
+namespace ExpenseManager.Tests.Integration.Repositories
 {
     public class BaseRepositoryIntegrationTests : IClassFixture<ExpenseManagerFactory>, IAsyncLifetime
     {

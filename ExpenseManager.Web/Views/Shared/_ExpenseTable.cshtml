@@ -20,14 +20,14 @@
                 <tbody>
                     @foreach (var expense in Model)
                     {
-                        <tr>
-                            <td class="expense-text-cell">@expense.Name</td>
-                            <td>@expense.Type</td>
-                            <td>@expense.Currency</td>
-                            <td>@expense.ValueString</td>
-                            <td class="expense-text-cell">@expense.Source</td>
-                            <td>@expense.ExpenseDate?.ToString("dd/MM/yyyy")</td>
-                            <td>
+                        <tr class="expense-row" data-expense-id="@expense.Id">
+                            <td class="expense-name expense-text-cell">@expense.Name</td>
+                            <td class="expense-type">@expense.Type</td>
+                            <td class="expense-currency">@expense.Currency</td>
+                            <td class="expense-value">@expense.ValueString</td>
+                            <td class="expense-source expense-text-cell">@expense.Source</td>
+                            <td class="expense-date">@expense.ExpenseDate?.ToString("dd/MM/yyyy")</td>
+                            <td class="expense-actions">
                                 <button type="button"
                                     class="btn p-0 border-0 bg-transparent expense-action-edit" 
                                     data-bs-toggle="modal" 

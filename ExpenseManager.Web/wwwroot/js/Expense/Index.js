@@ -44,6 +44,7 @@
     enableValidation();
     registerCreateHandler();
     registerEditHandler();
+    registerDeleteHandler();
 });
 
 function enableSuccessAlertProgress() {
@@ -139,13 +140,12 @@ function registerEditHandler() {
         
         const form = $("#editExpenseForm-" + expenseId);
 
-
         if ($.validator && !form.valid()) {
             return;
         }
 
         $.ajax({
-            url: "/Expense/Update",
+            url: form.attr("action"),
             type: "POST",
             data: form.serialize(),
             success: function (response) {
@@ -163,6 +163,49 @@ function registerEditHandler() {
                     errorContainer.html(errors.join("<br>"));
                 } else {
                     errorContainer.html("Error when processing request.");
+                }
+
+                errorContainer.removeClass("d-none").show();
+            }
+        });
+    });
+}
+
+function registerDeleteHandler() {
+    $(document).on("submit", ".delete-modal-form", function (e) {
+        e.preventDefault();
+
+        const form = $(this);
+        const expenseId = form.data("expense-id");
+
+        const errorContainer = 
+            $("#deleteErrorMessages-" + expenseId);
+
+        errorContainer.addClass("d-none").empty();
+
+        $.ajax({
+            url: form.attr("action"),
+            type: "POST",
+            data: form.serialize(),
+
+            success: function (response) {
+                if (response.success) {
+                    $("#deleteModal-" + expenseId).modal("hide");
+                    location.reload();
+                }
+            },
+
+            error: function (xhr) {
+                const errors = xhr.responseJSON?.errors;
+
+                if (errors && errors.length > 0) {
+                    errorContainer.html(
+                        errors.join("<br>")
+                    );
+                } else {
+                    errorContainer.html(
+                        "Error when processing request."
+                    );
                 }
 
                 errorContainer.removeClass("d-none").show();

@@ -1,5 +1,4 @@
-﻿using ExpenseManager.Core.Common;
-using ExpenseManager.Core.Contracts.Services;
+﻿using ExpenseManager.Core.Contracts.Services;
 using ExpenseManager.Core.Entities;
 using ExpenseManager.Web.Mapping.Contracts;
 using ExpenseManager.Web.Mapping.CustomMappings;
@@ -31,6 +30,7 @@ namespace ExpenseManager.Web.Controllers
         }
 
         [HttpGet]
+        
         public async Task<IActionResult> IndexAsync(int pageNumber = 1, int pageSize = 10)
         {
             var paginatedExpenses = await _expenseService
@@ -75,9 +75,8 @@ namespace ExpenseManager.Web.Controllers
             var response = await _expenseService
                 .GetExpensesWithFilterPagedAsync(filterModel);
 
-            if (!response.Success) 
-                return BadRequest(new 
-                { errors = response.Errors });
+            if (!response.Success) return BadRequest(
+                new { errors = response.Errors });
 
             var viewModel = _paginatedViewModelMapper
                 .ToExpensePaginatedViewModel(response.Data);
@@ -86,6 +85,7 @@ namespace ExpenseManager.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateAsync(ExpenseViewModel model)
         {
             if (!ModelState.IsValid)
@@ -97,8 +97,8 @@ namespace ExpenseManager.Web.Controllers
 
             var result = await _expenseService.CreateExpenseAsync(entity);
 
-            if (!result.Success)
-                return BadRequest(new { errors = result.Errors });
+            if (!result.Success) return BadRequest(
+                new { errors = result.Errors });
 
             TempData["SuccessMessage"] = "Expense registered successfully!";
 
@@ -106,6 +106,7 @@ namespace ExpenseManager.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateAsync(ExpenseViewModel expenseVM)
         {
             if (expenseVM.Id == Guid.Empty)
@@ -122,9 +123,8 @@ namespace ExpenseManager.Web.Controllers
 
             var result = await _expenseService.UpdateExpenseAsync(entity);
 
-            if (!result.Success)
-                return BadRequest(new { 
-                    errors = result.Errors });
+            if (!result.Success) return BadRequest(
+                new { errors = result.Errors });
 
             TempData["SuccessMessage"] = "Expense updated successfully!";
 
@@ -138,18 +138,13 @@ namespace ExpenseManager.Web.Controllers
             var result = await _expenseService.DeleteExpenseAsync(id);
 
             if (!result.Success)
-            {
-                TempData["ErrorMessage"] = string.Join("<br>", result.Errors);
-                return RedirectToAction("Index");
-            }
+                return BadRequest(new { 
+                    errors = result.Errors });
 
             TempData["SuccessMessage"] = "Expense deleted successfully!";
 
-            return RedirectToAction("Index");
+            return Ok(new { success = true });
         }
-
-        [HttpGet]
-        public IActionResult Create() => View();
 
         [HttpGet]
         public IActionResult Filter() => View(
