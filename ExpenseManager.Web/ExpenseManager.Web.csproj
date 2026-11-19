@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <UserSecretsId>10d1abe1-2ae3-44ed-bf02-3304a01ab505</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="3.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExpenseManager.Core\ExpenseManager.Core.csproj" />
+    <ProjectReference Include="..\ExpenseManager.Infrastructure\ExpenseManager.Infrastructure.csproj" />
+    <ProjectReference Include="..\ExpenseManager.IOC\ExpenseManager.IOC.csproj" />
+    <ProjectReference Include="..\ExpenseManager.Service\ExpenseManager.Service.csproj" />
+  </ItemGroup>
+
+</Project>

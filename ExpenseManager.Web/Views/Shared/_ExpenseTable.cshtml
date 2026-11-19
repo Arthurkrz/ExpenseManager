@@ -1,0 +1,60 @@
+﻿@using ExpenseManager.Web.Models
+@model IEnumerable<ExpenseViewModel>
+
+@if (Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-striped table-hover text-center expense-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Currency</th>
+                        <th>Value</th>
+                        <th>Source</th>
+                        <th>Date of expense</th>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var expense in Model)
+                    {
+                        <tr class="expense-row" data-expense-id="@expense.Id">
+                            <td class="expense-name expense-text-cell">@expense.Name</td>
+                            <td class="expense-type">@expense.Type</td>
+                            <td class="expense-currency">@expense.Currency</td>
+                            <td class="expense-value">@expense.ValueString</td>
+                            <td class="expense-source expense-text-cell">@expense.Source</td>
+                            <td class="expense-date">@expense.ExpenseDate?.ToString("dd/MM/yyyy")</td>
+                            <td class="expense-actions">
+                                <button type="button"
+                                    class="btn p-0 border-0 bg-transparent expense-action-edit" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editModal-@expense.Id">
+                                    <i class="fa-solid fa-pen-to-square expense-edit-icon"></i>
+                                </button>
+
+                                <button type="button"
+                                    class="btn p-0 border-0 bg-transparent expense-action-delete" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal-@expense.Id">
+                                    <i class="fa-solid fa-trash expense-delete-icon"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <partial name="_EditModal" model="expense" />
+                        <partial name="_DeleteModal" model="expense" />
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <h1 class="no-expense-found">
+        No expenses found!
+    </h1>
+}

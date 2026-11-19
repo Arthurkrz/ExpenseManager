@@ -1,0 +1,64 @@
+﻿@using ExpenseManager.Web.Models
+@model ExpenseViewModel
+
+<div class="modal fade"
+     id="deleteModal-@Model.Id"
+     tabindex="-1"
+     aria-labelledby="modalLabel-@Model.Id"
+     aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel-@Model.Id">
+                    Delete expense
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+
+            <div class="modal-body text-center">
+
+                <div id="deleteErrorMessages-@Model.Id"
+                     class="alert alert-danger d-none">
+                </div>
+
+                <h5>
+                    Are you sure that you wish to delete this expense?
+                </h5>
+
+                <h6 class="text-danger pt-2">
+                    This action is irreversible!
+                </h6>
+            </div>
+
+            <div class="modal-footer delete-modal-footer">
+                <button type="button"
+                        class="btn btn-secondary delete-modal-button"
+                        data-bs-dismiss="modal">
+                    No
+                </button>
+
+                <form asp-controller="Expense"
+                      asp-action="Delete"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="delete-modal-form"
+                      data-expense-id="@Model.Id">
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="btn btn-danger delete-modal-button">
+                        Yes
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
